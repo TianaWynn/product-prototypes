@@ -1,0 +1,205 @@
+/* duplicate-detection.css — 原文件两处 <style>(第107-177行 与 第181-249行) 合并：重复品检测/报告/卡片/状态语义 */
+.manager-pane-note{font-size:12px;color:#909399;margin:-2px 0 12px}.manager-tabs{gap:26px}.manager-tabs .modal-tab{font-size:13px}.manager-tabs .badge{margin-left:4px}.manager-tabs+.summary-cards{margin-top:2px}
+
+/* 产品详情：独立的 SPU 检测信息区，操作不出现在项目列表 */
+.dup-product-strip{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;background:white;border:1px solid #dfe5e9;border-radius:4px;margin:10px 0;padding:10px 14px}
+.dup-product-strip-info,.dup-product-strip-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.dup-product-strip-info strong{color:#303133}
+@media(max-width:740px){.dup-product-strip{align-items:flex-start}.dup-product-strip-actions{width:100%;justify-content:flex-end}}
+
+/* 候选基础展示（现已统一改为表格） */
+.dup-candidate-card.v13-compact{padding:12px 14px;margin:9px 0;border-color:#e6e9ee}
+.v13-compact .dup-candidate-photo{width:76px;height:76px}
+.v13-compact .dup-candidate-main{display:flex;flex-direction:column;gap:5px}
+.v13-compact .dup-candidate-title{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:13px}
+.v13-compact .dup-candidate-productname{font-size:12px;line-height:1.55;color:#323b45}
+.v13-compact .dup-mini-reason{font-size:12px;color:#667383;line-height:1.55;border-top:1px dashed #eceff2;padding-top:7px;margin-top:3px}
+.v13-compact .dup-mini-label{color:#9098a1;margin-right:7px}
+.v13-compact .dup-candidate-link{font-size:13px}
+.v13-compact .dup-mini-reason span:last-child{overflow-wrap:anywhere}
+.v13-compact .dup-candidate-photo{background:#fff}
+.v13-compact .dup-candidate-header{align-items:center}
+
+/* V14: 与项目SPU列表保持一致的行式表格。目标及候选商品均展示代表 SKU 单列。 */
+.dup-table-section-label{font-size:12px;color:#606266;font-weight:600;margin:12px 0 7px}
+.dup-target-label{margin-top:12px}
+.dup-table-wrap{max-width:100%;overflow-x:auto;border:1px solid #ebeef5;border-radius:3px}
+.dup-candidates-table{width:100%;border-collapse:collapse;table-layout:fixed;background:#fff}
+.dup-candidates-table thead{background:#f5f7fa}
+.dup-candidates-table th{font-size:12px;line-height:1.4;text-align:left;padding:10px 12px;color:#606266;font-weight:500;border-right:1px solid #ebeef5;white-space:nowrap}
+.dup-candidates-table td{padding:10px 12px;border-top:1px solid #ebeef5;border-right:1px solid #ebeef5;color:#606266;font-size:12px;line-height:1.65;vertical-align:middle;overflow-wrap:anywhere}
+.dup-candidates-table th:last-child,.dup-candidates-table td:last-child{border-right:0}
+.dup-candidates-table tbody tr:hover{background:#f6fbfa}
+.dup-candidate-row-img{width:56px;height:56px;border:1px solid #ebeef5;border-radius:3px;object-fit:contain;background:#fff;display:block;margin:auto}
+.dup-candidates-table .dup-photo-col{text-align:center}
+.dup-candidates-table .dup-title-col{color:#303133}
+.dup-candidates-table .dup-reason-col{color:#606266}
+.dup-spu-strong{color:#303133;font-weight:600}
+.dup-count-inline{display:flex;gap:0;align-items:center;flex-wrap:wrap;border:1px solid #ebeef5;border-radius:3px;background:#fff;margin:14px 0 10px;min-height:48px}
+.dup-count-inline-item{flex:1;min-width:125px;display:flex;align-items:center;justify-content:center;gap:12px;border-right:1px solid #ebeef5;padding:10px 14px;color:#909399;font-size:12px}
+.dup-count-inline-item:last-child{border-right:0}
+.dup-sku-col{color:#5f6b78;font-variant-numeric:tabular-nums;word-break:break-all}
+.dup-count-inline-item strong{font-size:17px;color:#303133;font-weight:600}
+.dup-report-summary{background:#f7f9fb;border:1px solid #ebeef5;border-radius:3px;padding:10px 12px;margin:10px 0;color:#606266;font-size:12px;line-height:1.6}
+@media(max-width:700px){.dup-candidates-table{min-width:680px}.dup-count-inline-item{flex-basis:50%}.dup-count-inline-item:nth-child(2){border-right:1px solid #ebeef5}}
+
+
+/* 原型双布局对比：Tab 不重复展示顶部分类数量；单表新增“检测结果”列。 */
+.dup-layout-tab .dup-table-section-label{display:none}
+.dup-layout-choice{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 12px;padding:8px 10px;background:#f7f9fb;border:1px dashed #dce4ed;border-radius:3px}
+.dup-layout-choice .caption{font-size:11px;color:#727c88;margin-right:4px}
+.dup-layout-choice button{padding:5px 12px;font-size:12px}
+.dup-layout-choice button.active{color:#138f85;background:#e8f8f6;border-color:#79cbc3;font-weight:600}
+.dup-layout-tag{font-size:10px;color:#708192;padding:1px 6px;border:1px solid #dae3ed;border-radius:2px;background:#f7f9fc}
+.dup-all-list .dup-candidates-table{min-width:800px}
+.dup-all-list .dup-candidates-table td{line-height:1.6}
+.dup-result-tag{font-size:11px;white-space:nowrap;display:inline-block;border-radius:3px;padding:2px 6px;font-weight:500}
+.dup-result-tag.duplicate{color:#d9534f;background:#fef0f0;border:1px solid #ffd7d7}
+.dup-result-tag.style{color:#bd6b00;background:#fff4e5;border:1px solid #f6d6a8}
+.dup-result-tag.suspected{color:#9a7900;background:#fffbe6;border:1px solid #f1e2a2}
+.demo-layout-quick{display:flex;gap:7px;flex-wrap:wrap;margin:6px 0 10px}
+.demo-layout-quick button{padding:6px 10px;font-size:12px}
+
+/* Detection severity: red = same product (highest), orange = same style, yellow = suspected; technical failure is neutral. */
+.badge-severity-duplicate{background:#fef0f0;color:#c93636;border:1px solid #f6caca}
+.badge-severity-style{background:#fff4e5;color:#bd6b00;border:1px solid #f6d6a8}
+.badge-severity-suspected{background:#fffbe6;color:#9a7900;border:1px solid #f1e2a2}
+.badge-process-failed{background:#f4f4f5;color:#909399;border:1px solid #e4e7ed}
+/* 检测中加载态与命中排除规则的 SPU */
+.dup-loading-state{display:inline-flex;align-items:center;gap:7px;color:#409eff;font-size:12px;font-weight:500;white-space:nowrap}
+.dup-spinner{display:inline-block;width:13px;height:13px;border:2px solid #d9ecff;border-top-color:#409eff;border-right-color:#409eff;border-radius:50%;animation:dup-spin .8s linear infinite;flex:0 0 13px}
+@keyframes dup-spin{to{transform:rotate(360deg)}}
+.badge-muted{background:#f4f4f5;color:#909399;border:1px solid #e9e9eb}
+.dup-skip-note{margin:12px 0;padding:10px 12px;background:#f5f7fa;border:1px solid #e4e7ed;border-radius:3px;color:#606266;line-height:1.7}
+
+.dup-demo-bar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;border-top:1px dashed #e5e9ef;background:#fbfcfd;padding:9px 12px;font-size:12px;color:#727a83}
+.dup-demo-bar b{color:#3d4650;font-weight:600;margin-right:4px}
+.dup-demo-bar button{padding:4px 9px;border-radius:3px;font-size:12px;border-color:#dde5eb;background:white;color:#52727f}
+.dup-demo-bar button:hover{border-color:#22a89d;color:#168e86}
+.detection-cell{align-items:flex-start;text-align:left;gap:5px;padding-left:6px}
+.detection-cell .btn-text{padding:1px 0}
+.detection-counts{font-size:11px;line-height:1.5;color:#626d79;white-space:normal}
+.detection-caption{font-size:10px;color:#969ba3}
+.detection-badge{font-weight:600;font-size:11px}
+.dup-report-tabs{display:flex;gap:0;border-bottom:1px solid #e5e9ef;margin:14px 0 10px;overflow-x:auto}
+.dup-report-tab{border:0;border-radius:0;background:transparent;padding:10px 16px 9px;border-bottom:2px solid transparent;color:#66717b;white-space:nowrap}
+.dup-report-tab.active{color:#15998f;border-bottom-color:#15998f;font-weight:600}
+.dup-report-tab:hover{color:#15998f}
+.dup-section-summary{margin:0 0 12px;color:#7b818a;font-size:12px}
+.dup-candidate-card{border:1px solid #e6eaf0;border-radius:4px;padding:12px 14px;margin:10px 0;background:#fff}
+.dup-candidate-header{display:flex;align-items:flex-start;gap:12px}
+.dup-candidate-photo{width:68px;height:68px;object-fit:contain;border:1px solid #e8ecf0;border-radius:3px;flex-shrink:0}
+.dup-candidate-main{min-width:0;flex:1}
+.dup-candidate-title{font-weight:600;color:#313740;line-height:1.5}
+.dup-candidate-meta{color:#909399;font-size:11px;margin-top:5px;line-height:1.6}
+.dup-candidate-note{display:grid;grid-template-columns:90px 1fr;gap:6px 12px;padding:10px 0 0;margin-top:10px;border-top:1px dashed #e5e9ef;font-size:12px;line-height:1.6}
+.dup-candidate-note .name{color:#88919a}
+.dup-candidate-note .value{color:#5b6470}
+.dup-candidate-link{color:#169e93;cursor:pointer;font-weight:600}
+.dup-candidate-link:hover{text-decoration:underline}
+.dup-flow-pill{display:inline-flex;background:#e9f8f6;border:1px solid #ccece6;border-radius:3px;padding:2px 7px;font-size:11px;color:#218a81}
+.dup-info-band{font-size:11px;line-height:1.6;color:#7b8792;background:#f7f9fb;border-radius:3px;padding:9px 11px;margin:12px 0}
+.dup-zero{padding:26px 18px;border:1px dashed #d7e0e8;border-radius:4px;text-align:center;background:#fcfdfe}
+.dup-zero-icon{font-size:27px;margin-bottom:7px;color:#98a7b5}
+.dup-zero h4{font-size:14px;margin:0 0 7px;color:#4a5562}
+.dup-zero p{font-size:12px;color:#82909b;margin:0;line-height:1.6}
+.dup-timeline{display:flex;gap:0;margin:14px 0 18px;flex-wrap:wrap}
+.dup-timeline-step{min-width:120px;flex:1;position:relative;padding:11px 8px;border:1px solid #e6eaef;background:#f8f9fb;text-align:center;font-size:12px;color:#8e959c}
+.dup-timeline-step + .dup-timeline-step{border-left:0}
+.dup-timeline-step.active{color:#128d84;background:#e9faf7;border-color:#bde8e1;font-weight:600}
+.dup-timeline-step.done{color:#4e9971;background:#f0f9f1}
+.dup-explain-label{color:#8a949e;font-size:11px;margin-bottom:6px}
+@media(max-width:720px){.dup-candidate-header{flex-wrap:wrap}.dup-candidate-note{grid-template-columns:72px 1fr}.dup-demo-bar>span{display:none}.dup-timeline-step{min-width:75px}}
+
+/* V11 - one display status, keep database trace entirely out of the business interface */
+.spu-table .col-detection{width:164px}
+.spu-table{min-width:1920px}
+.detection-cell{align-items:flex-start;text-align:left;gap:6px;padding:1px 0 1px 7px}
+.detection-actions{display:flex;align-items:center;flex-wrap:wrap;column-gap:13px;row-gap:3px}
+.detection-actions .btn-text{font-size:12px;padding:2px 0;color:#189d94}
+.detection-actions .btn-text:disabled{color:#a6a9ad;background:transparent}
+.detection-badge{font-weight:600}
+.demo-scenarios{border-top:1px dashed #e5e9ef;background:#fdfefe;font-size:12px}
+.demo-scenarios>summary{cursor:pointer;color:#667886;padding:10px 15px;display:flex;gap:12px;align-items:center;user-select:none}
+.demo-scenarios>summary:hover{color:#179d94}
+.demo-count{font-size:10px;border:1px solid #dde6e9;border-radius:3px;padding:2px 6px;color:#86939f}
+.demo-scenarios-content{border-top:1px solid #edf1f3;padding:13px 15px 15px}
+.demo-title{font-weight:600;color:#42515e;margin:7px 0}
+.demo-buttons{display:flex;flex-wrap:wrap;gap:7px}
+.demo-buttons button{padding:6px 9px;font-size:12px;border-color:#dce6e9;background:#fff}
+.demo-buttons button:hover{color:#159e95;border-color:#8bd9d3}
+.demo-hint{margin-top:8px;color:#87939c;font-size:11px;line-height:1.6}
+.manual-confirm{border:1px solid #dfe8ef;background:#f8fafc;border-radius:4px;padding:11px 14px;line-height:1.7;margin:12px 0;color:#60717d}
+.manual-confirm strong{color:#354451}
+.modal-history-item{border:1px solid #e3e8ee;border-radius:4px;padding:10px 12px;margin:8px 0;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.modal-history-meta{font-size:11px;color:#87939c;margin-top:4px}
+.modal-actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.modal-actions .btn-primary{background:#32b7ac;border-color:#32b7ac}
+.dup-disclaimer{font-size:11px;color:#83919c;line-height:1.6;margin-top:12px}
+
+/* V14 status semantics: execution success and business conclusion are separate dimensions. */
+.detection-status-line{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+.detection-execution-success{font-size:10px;color:#3d9b6d;white-space:nowrap;font-weight:500}
+.dup-report-head .badge-success{font-weight:600}
+
+/* ===== 重复品检测补充样式 ===== */
+/* duplicate-detection-patches.css — 原文件后续增量 <style> 补丁(按原顺序合并)：V14.1/V15/V19/V21 */
+/* 原第2197-2204行 */
+
+.dup-count-overview{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 14px;padding:10px 12px;border:1px solid #ebeef5;background:#fafbfc;border-radius:4px}
+.dup-count-overview-title{font-size:12px;color:#909399;margin-right:2px}
+.dup-count-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:3px;background:#fff;border:1px solid #ebeef5;font-size:12px;color:#606266}
+.dup-count-chip strong{font-size:14px;font-weight:600}
+.dup-count-chip.same strong{color:#e05252}
+.dup-count-chip.style strong{color:#d88a24}
+.dup-count-chip.suspected strong{color:#b08a00}
+.dup-reason-col{line-height:1.55;word-break:break-word}
+
+/* 原第2286行 */
+
+.dup-spu-static{color:var(--primary);font-weight:500;white-space:nowrap}
+
+/* 原第2420-2430行 */
+
+.detection-cell-clickable{
+  width:100%;
+  min-height:54px;
+  cursor:pointer;
+  border-radius:3px;
+  transition:background-color .15s ease;
+  user-select:none;
+}
+.detection-cell-clickable:hover{background:#f1faf9}
+.detection-cell-clickable:active{background:#e8f7f5}
+.detection-cell-clickable:focus-visible{outline:2px solid #8bd9d3;outline-offset:2px}
+
+/* 原第2466-2467行 */
+
+.detection-cell-tooltipable{cursor:help}
+.detection-cell-tooltipable:hover{background:#fafbfc}
+
+/* 原第2569-2570行 */
+
+.dup-result-first-col{white-space:nowrap;width:112px}
+.dup-result-first-col .dup-result-tag{display:inline-flex;align-items:center;justify-content:center;min-width:68px}
+
+/* 原第2616-2634行 */
+
+.dup-reason-col{position:relative;max-width:390px;line-height:1.65;cursor:help}
+.dup-reason-hover{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;max-width:100%;border-bottom:1px dashed #aeb8c4;color:#606266;cursor:help;line-height:1.65}
+.dup-reason-hover:hover{color:#303133}
+.dup-reason-hover::after{content:attr(data-full-reason);display:none;position:absolute;z-index:30;left:0;top:calc(100% + 7px);width:min(560px,70vw);max-height:280px;overflow:auto;white-space:normal;overflow-wrap:anywhere;padding:12px 14px;background:#fff;border:1px solid #dcdfe6;border-radius:4px;box-shadow:0 4px 14px rgba(0,0,0,.14);color:#303133;font-size:12px;line-height:1.75;font-weight:400;text-align:left}
+.dup-reason-hover:hover::after,.dup-reason-hover:focus::after{display:block}
+.dup-rule-reference{margin-top:18px;border:1px solid #e4e7ed;border-radius:4px;background:#fff}
+.dup-rule-reference summary{padding:11px 14px;cursor:pointer;color:#303133;font-size:13px;font-weight:600;list-style:none;display:flex;align-items:center;justify-content:space-between}
+.dup-rule-reference summary::-webkit-details-marker{display:none}
+.dup-rule-reference summary::after{content:'展开 +';font-size:12px;color:#409eff;font-weight:400}
+.dup-rule-reference[open] summary::after{content:'收起 −'}
+.dup-rule-content{padding:0 14px 14px}
+.dup-rule-intro{font-size:12px;color:#909399;line-height:1.6;margin:0 0 10px}
+.dup-rule-table-wrap{overflow-x:auto}
+.dup-rule-table{width:100%;border-collapse:collapse;font-size:12px;line-height:1.65;min-width:650px}
+.dup-rule-table th,.dup-rule-table td{border:1px solid #ebeef5;padding:8px 10px;text-align:left;vertical-align:top}
+.dup-rule-table th{background:#f5f7fa;color:#606266;font-weight:600;white-space:nowrap}
+.dup-rule-table td:nth-child(2){white-space:nowrap;font-weight:600}
+.dup-rule-tag{display:inline-block;padding:1px 7px;border-radius:3px;background:#f4f4f5;color:#606266}
+.dup-rule-tag.same{background:#fef0f0;color:#f56c6c}.dup-rule-tag.style{background:#f4f0ff;color:#8b65c7}.dup-rule-tag.suspected{background:#fdf6ec;color:#e6a23c}.dup-rule-tag.none{background:#f0f9eb;color:#67c23a}
