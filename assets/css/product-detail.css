@@ -1,0 +1,70 @@
+/* product-detail.css — 从原文件 <style>(第37-106行) 拆分：产品详情视图样式 */
+/* Connected product detail view: stays in the same prototype and shares the project context. */
+#productView{display:none;padding-top:0}
+.global-crumb{height:31px;display:flex;align-items:center;gap:9px;background:#fff;border-bottom:1px solid #ebeef5;padding:0 12px;color:#606266;font-size:12px;margin:0 -9px 9px}
+.global-crumb .right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.global-crumb .crumb-link{color:#168e86;cursor:pointer}
+.product-app-tabs{height:28px;display:flex;gap:6px;align-items:flex-start;margin-bottom:7px}
+.product-app-tabs .tab{font-size:11px;padding:4px 8px}
+.product-topcard,.product-overview,.variant-strip,.country-module,.spu-subcard{background:#fff;border:1px solid var(--border);border-radius:5px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.product-topcard{padding:13px 12px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.product-breadcrumb{display:flex;align-items:center;gap:9px;flex:1;min-width:300px;color:#7b818a;font-size:12px}
+.product-breadcrumb .crumb{color:#168e86;cursor:pointer}
+.product-actions{display:flex;gap:6px;flex-wrap:wrap}
+.product-actions button{padding:6px 11px;font-size:12px}
+.product-quality{border:1px solid #e4efe3;background:#f7fcf6;border-radius:6px;padding:7px 10px;display:flex;align-items:center;gap:7px;font-size:11px;color:#6d9860}
+.quality-circle{border:3px solid #67c23a;color:#67c23a;border-radius:50%;width:31px;height:31px;display:grid;place-items:center;font-weight:700;font-size:11px;background:white}
+.product-overview{padding:12px;overflow:hidden}
+.product-sku-head{display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:linear-gradient(90deg,#e9f8f6,#fbfefe);border-left:3px solid var(--primary);padding:9px 11px;margin-bottom:10px;color:#168e86}
+.product-sku-head strong{color:#303133;font-size:14px}
+.product-tag{display:inline-flex;padding:3px 6px;border-radius:3px;background:#fdf6ec;border:1px solid #f5dab1;color:#bd7815;font-size:11px;white-space:nowrap}
+.product-overview-grid{display:grid;grid-template-columns:170px minmax(190px,1.18fr) minmax(190px,1.18fr) minmax(190px,1.18fr) minmax(190px,1.18fr);gap:10px}
+.product-image-panel{min-height:210px;border:1px solid #f0f1f4;border-radius:3px;display:flex;align-items:center;justify-content:center;background:#fff;padding:8px}
+.product-image-panel img{max-height:190px;max-width:100%;object-fit:contain}
+.info-panel{background:#fafafa;border-radius:4px;padding:12px 11px;min-width:0;line-height:1.65;font-size:12px;color:#606266}
+.info-panel h4{margin:0 0 7px;color:#303133;font-size:12px;font-weight:600}
+.info-line{margin:4px 0;overflow-wrap:anywhere}
+.info-line .label{color:#909399}
+.country-pills{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.country-pill{padding:2px 5px;font-size:11px;border-radius:3px;background:#f0f9eb;border:1px solid #d7edc8;color:#67c23a}
+.country-pill.no{background:#fef0f0;border-color:#fde2e2;color:#f56c6c}
+.country-pill.pending{background:#fdf6ec;border-color:#f5dab1;color:#bd7815}
+.variant-strip{padding:10px 13px;display:flex;gap:9px;align-items:center;overflow-x:auto;min-height:90px}
+.variant-arrow{height:27px;min-width:27px;border:1px solid #e4e7ed;border-radius:50%;padding:0;background:#fff;color:#909399}
+.variant-card{display:flex;align-items:center;gap:8px;min-width:218px;max-width:260px;border:1px solid #ebeef5;border-radius:5px;padding:8px;background:#fff;cursor:pointer;transition:.15s}
+.variant-card:hover{border-color:#8bd9d3;background:#f9fefd}
+.variant-card.active{border:1px solid var(--primary);background:#f1fbfa}
+.variant-card img{width:38px;height:46px;object-fit:contain}
+.variant-card .variant-id{color:#168e86;font-size:12px;font-weight:600}
+.variant-card .variant-desc{color:#606266;font-size:11px;margin-top:3px}
+.variant-card .variant-sub{color:#a0a4ac;font-size:11px;margin-top:2px}
+.country-module{overflow:hidden;border-color:#e3e9eb}
+.country-module-head{display:flex;align-items:center;gap:11px;padding:11px 14px;border-bottom:1px solid #ebeef5;flex-wrap:wrap}
+.country-tab{color:#168e86;border-bottom:2px solid var(--primary);padding:4px 0 8px;font-weight:600}.country-module-tabs{display:flex;gap:18px;align-items:flex-end}.country-tab-switch{color:#7b818a;padding:4px 0 8px;font-weight:600;border-bottom:2px solid transparent;cursor:pointer}.country-tab-switch.active{color:#168e86;border-bottom-color:var(--primary)}.readonly-tip{background:#f0fbfa;border:1px solid #b3e9e4;color:#388e88;border-radius:3px;padding:9px 10px;font-size:12px;line-height:1.5;margin-bottom:12px}.similar-table{width:100%;border-collapse:collapse;table-layout:fixed}.similar-table th,.similar-table td{border:1px solid #ebeef5;padding:10px 8px;font-size:12px;line-height:1.5;vertical-align:middle;text-align:left}.similar-table th{background:#f5f7fa;color:#7b818a;font-weight:500}.similar-thumb{width:48px;height:48px;object-fit:contain;background:#fff;display:block;border:1px solid #ebeef5;border-radius:3px}.similar-spu{color:#168e86;font-weight:600;cursor:pointer}.similar-spu:hover{text-decoration:underline}.similar-note{font-size:12px;color:#909399;margin-top:8px}
+.group-badge{padding:4px 8px;border:1px solid #9ece84;background:#f5fbf0;border-radius:3px;color:#4a8330;font-size:11px}
+.country-module-body{padding:13px 14px 14px}
+.country-module-title{font-weight:600;color:#303133;margin-bottom:7px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.relation-note{font-size:12px;color:#909399;font-weight:400}
+.relation-warning{padding:8px 10px;background:#fdf6ec;border:1px solid #f5dab1;color:#986b22;border-radius:3px;font-size:12px;line-height:1.5;margin:9px 0 10px}
+.relation-info{padding:8px 10px;background:#f0fbfa;border:1px solid #d3f1ee;color:#388e88;border-radius:3px;font-size:12px;line-height:1.5;margin:9px 0 10px}
+.country-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.country-table th,.country-table td{border:1px solid #ebeef5;padding:9px 8px;text-align:left;font-size:12px;vertical-align:middle;line-height:1.5}
+.country-table th{background:#f5f7fa;color:#7b818a;font-weight:500}
+.country-table td{color:#606266}
+.country-table .spu-code{color:#168e86;cursor:pointer;white-space:nowrap}
+.country-table .sku-code{color:#168e86;cursor:pointer;white-space:nowrap}
+.country-table .title-cell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.empty-relation{padding:28px 10px;text-align:center;border:1px dashed #dcdfe6;color:#909399;background:#fcfcfd}
+.spu-detail-banner{display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:#eaf8f6;border:1px solid #ccefeb;border-left:3px solid var(--primary);padding:11px 13px;border-radius:4px;margin-bottom:0}
+.spu-detail-banner strong{color:#303133}
+.spu-detail-tabs{display:flex;gap:0;overflow-x:auto;background:#fff;border-bottom:1px solid #ebeef5;margin-bottom:0}
+.spu-detail-tabs span{padding:12px 15px;white-space:nowrap;font-size:12px;color:#777f89}
+.spu-detail-tabs span.active{color:#168e86;background:#f0fbfa;font-weight:600}
+.product-sales-mock{background:#f5f7fa;border:1px solid #ebeef5;padding:14px}
+.sales-head{display:flex;gap:7px;margin-bottom:12px}
+.sales-pill{background:#fff;border:1px solid #dcdfe6;border-radius:4px;padding:7px 10px;font-size:11px}
+.sales-pill.active{border-color:#8bd9d3;color:#168e86;background:#f4fcfb}
+@media(max-width:1250px){.product-overview-grid{grid-template-columns:160px repeat(2,minmax(180px,1fr))}.product-image-panel{grid-row:span 2}.info-panel{min-height:150px}}
+@media(max-width:760px){.product-overview-grid{grid-template-columns:1fr 1fr}.product-image-panel{grid-column:span 2;grid-row:auto;min-height:150px}.product-image-panel img{max-height:145px}.global-crumb .right{display:none}.product-breadcrumb{min-width:100%}.product-actions{width:100%}.product-actions button{flex:1}.country-table{min-width:850px}.country-module-body{overflow-x:auto}.variant-card{min-width:200px}}
+
+@media(max-width:1000px){.detail-grid{grid-template-columns:repeat(2,minmax(180px,1fr))}.title-row{align-items:flex-start;flex-wrap:wrap}.summary-cards{grid-template-columns:1fr}.compare-grid{grid-template-columns:1fr}.filter-input{width:180px}}
