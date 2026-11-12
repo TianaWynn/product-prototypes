@@ -53,9 +53,9 @@
 .dup-all-list .dup-candidates-table{min-width:800px}
 .dup-all-list .dup-candidates-table td{line-height:1.6}
 .dup-result-tag{font-size:11px;white-space:nowrap;display:inline-block;border-radius:3px;padding:2px 6px;font-weight:500}
-.dup-result-tag.duplicate{color:#d9534f;background:#fef0f0;border:1px solid #ffd7d7}
-.dup-result-tag.style{color:#bd6b00;background:#fff4e5;border:1px solid #f6d6a8}
-.dup-result-tag.suspected{color:#9a7900;background:#fffbe6;border:1px solid #f1e2a2}
+.dup-result-tag.duplicate{color:#bf5f5f;background:#fdf2f2;border:1px solid #f4dede}
+.dup-result-tag.style{color:#a9782f;background:#fdf8ef;border:1px solid #f0e2c8}
+.dup-result-tag.suspected{color:#8f7a2e;background:#fdfaec;border:1px solid #ece3bf}
 .demo-layout-quick{display:flex;gap:7px;flex-wrap:wrap;margin:6px 0 10px}
 .demo-layout-quick button{padding:6px 10px;font-size:12px}
 
@@ -66,7 +66,8 @@
 .badge-process-failed{background:#f4f4f5;color:#909399;border:1px solid #e4e7ed}
 /* 检测中加载态与命中排除规则的 SPU */
 .dup-loading-state{display:inline-flex;align-items:center;gap:7px;color:#409eff;font-size:12px;font-weight:500;white-space:nowrap}
-.dup-spinner{display:inline-block;width:13px;height:13px;border:2px solid #d9ecff;border-top-color:#409eff;border-right-color:#409eff;border-radius:50%;animation:dup-spin .8s linear infinite;flex:0 0 13px}
+/* 检测中 loading：放射状 12 线，颜色跟随文字 #7b818a，逐格旋转（形状对齐系统「评分中」样式） */
+.dup-spinner{display:inline-block;width:14px;height:14px;flex:0 0 14px;border:0;border-radius:0;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cg%20stroke%3D%27%237b818a%27%20stroke-width%3D%272.6%27%20stroke-linecap%3D%27round%27%3E%3Cline%20x1%3D%2712.00%27%20y1%3D%275.80%27%20x2%3D%2712.00%27%20y2%3D%271.60%27%20opacity%3D%271.0%27%2F%3E%3Cline%20x1%3D%2715.10%27%20y1%3D%276.63%27%20x2%3D%2717.20%27%20y2%3D%272.99%27%20opacity%3D%270.928%27%2F%3E%3Cline%20x1%3D%2717.37%27%20y1%3D%278.90%27%20x2%3D%2721.01%27%20y2%3D%276.80%27%20opacity%3D%270.856%27%2F%3E%3Cline%20x1%3D%2718.20%27%20y1%3D%2712.00%27%20x2%3D%2722.40%27%20y2%3D%2712.00%27%20opacity%3D%270.784%27%2F%3E%3Cline%20x1%3D%2717.37%27%20y1%3D%2715.10%27%20x2%3D%2721.01%27%20y2%3D%2717.20%27%20opacity%3D%270.712%27%2F%3E%3Cline%20x1%3D%2715.10%27%20y1%3D%2717.37%27%20x2%3D%2717.20%27%20y2%3D%2721.01%27%20opacity%3D%270.64%27%2F%3E%3Cline%20x1%3D%2712.00%27%20y1%3D%2718.20%27%20x2%3D%2712.00%27%20y2%3D%2722.40%27%20opacity%3D%270.568%27%2F%3E%3Cline%20x1%3D%278.90%27%20y1%3D%2717.37%27%20x2%3D%276.80%27%20y2%3D%2721.01%27%20opacity%3D%270.496%27%2F%3E%3Cline%20x1%3D%276.63%27%20y1%3D%2715.10%27%20x2%3D%272.99%27%20y2%3D%2717.20%27%20opacity%3D%270.424%27%2F%3E%3Cline%20x1%3D%275.80%27%20y1%3D%2712.00%27%20x2%3D%271.60%27%20y2%3D%2712.00%27%20opacity%3D%270.352%27%2F%3E%3Cline%20x1%3D%276.63%27%20y1%3D%278.90%27%20x2%3D%272.99%27%20y2%3D%276.80%27%20opacity%3D%270.28%27%2F%3E%3Cline%20x1%3D%278.90%27%20y1%3D%276.63%27%20x2%3D%276.80%27%20y2%3D%272.99%27%20opacity%3D%270.208%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") center/contain no-repeat;animation:dup-spin .9s steps(12) infinite;transform-origin:50% 50%}
 @keyframes dup-spin{to{transform:rotate(360deg)}}
 .badge-muted{background:#f4f4f5;color:#909399;border:1px solid #e9e9eb}
 .dup-skip-note{margin:12px 0;padding:10px 12px;background:#f5f7fa;border:1px solid #e4e7ed;border-radius:3px;color:#606266;line-height:1.7}
@@ -111,7 +112,7 @@
 @media(max-width:720px){.dup-candidate-header{flex-wrap:wrap}.dup-candidate-note{grid-template-columns:72px 1fr}.dup-demo-bar>span{display:none}.dup-timeline-step{min-width:75px}}
 
 /* V11 - one display status, keep database trace entirely out of the business interface */
-.spu-table .col-detection{width:164px}
+.spu-table .col-detection{width:210px}
 .spu-table{min-width:1920px}
 .detection-cell{align-items:flex-start;text-align:left;gap:6px;padding:1px 0 1px 7px}
 .detection-actions{display:flex;align-items:center;flex-wrap:wrap;column-gap:13px;row-gap:3px}
@@ -156,7 +157,7 @@
 
 /* 原第2286行 */
 
-.dup-spu-static{color:var(--primary);font-weight:500;white-space:nowrap}
+.dup-spu-static{color:#606266;font-weight:400;white-space:nowrap}
 
 /* 原第2420-2430行 */
 
@@ -168,13 +169,14 @@
   transition:background-color .15s ease;
   user-select:none;
 }
-.detection-cell-clickable:hover{background:#f1faf9}
-.detection-cell-clickable:active{background:#e8f7f5}
-.detection-cell-clickable:focus-visible{outline:2px solid #8bd9d3;outline-offset:2px}
+.detection-cell-clickable:hover{background:#f7f8f9}
+.detection-cell-clickable:active{background:#f0f2f3}
+.detection-cell-clickable:focus-visible{outline:2px solid #cfe8e5;outline-offset:-2px}
 
 /* 原第2466-2467行 */
 
-.detection-cell-tooltipable{cursor:help}
+/* 不用 cursor:help —— 鼠标旁会多出问号，改用默认箭头 + 自定义黑底浮层 */
+.detection-cell-tooltipable{cursor:default}
 .detection-cell-tooltipable:hover{background:#fafbfc}
 
 /* 原第2569-2570行 */
@@ -184,11 +186,18 @@
 
 /* 原第2616-2634行 */
 
-.dup-reason-col{position:relative;max-width:390px;line-height:1.65;cursor:help}
-.dup-reason-hover{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;max-width:100%;border-bottom:1px dashed #aeb8c4;color:#606266;cursor:help;line-height:1.65}
+.dup-reason-col{position:relative;max-width:560px;line-height:1.6;cursor:default}
+/* 判断依据按维度拆行，最多 4 行；每行单行展示，超长打省略号，悬浮看全文（兜底） */
+.dup-reason-col .dup-reason-hover{display:block;overflow:visible;cursor:default;color:#606266}
+.dup-reason-line{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.6}
+.dup-reason-hover:hover .dup-reason-line{color:#303133}
+.dup-reason-hover{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden;max-width:100%;color:#606266;cursor:help;line-height:1.65}
 .dup-reason-hover:hover{color:#303133}
-.dup-reason-hover::after{content:attr(data-full-reason);display:none;position:absolute;z-index:30;left:0;top:calc(100% + 7px);width:min(560px,70vw);max-height:280px;overflow:auto;white-space:normal;overflow-wrap:anywhere;padding:12px 14px;background:#fff;border:1px solid #dcdfe6;border-radius:4px;box-shadow:0 4px 14px rgba(0,0,0,.14);color:#303133;font-size:12px;line-height:1.75;font-weight:400;text-align:left}
-.dup-reason-hover:hover::after,.dup-reason-hover:focus::after{display:block}
+/* 悬浮提示改为挂在 body 上的独立浮层，避免被表格滚动容器裁剪；pointer-events:none 不挡滚动条。
+   深色底白字，默认在触发元素上方弹出，上方空间不足时才翻到下方。 */
+.dup-reason-tip{position:fixed;z-index:1200;max-width:620px;padding:10px 13px;background:#23262b;color:#f2f3f5;border:0;border-radius:4px;box-shadow:0 8px 24px rgba(0,0,0,.24);font-size:12px;line-height:1.75;text-align:left;white-space:pre-line;overflow-wrap:anywhere;pointer-events:none;display:none}
+.dup-reason-tip::after{content:'';position:absolute;left:var(--tip-arrow,50%);bottom:-4px;width:8px;height:8px;background:#23262b;transform:translateX(-50%) rotate(45deg)}
+.dup-reason-tip.below::after{bottom:auto;top:-4px}
 .dup-rule-reference{margin-top:18px;border:1px solid #e4e7ed;border-radius:4px;background:#fff}
 .dup-rule-reference summary{padding:11px 14px;cursor:pointer;color:#303133;font-size:13px;font-weight:600;list-style:none;display:flex;align-items:center;justify-content:space-between}
 .dup-rule-reference summary::-webkit-details-marker{display:none}
@@ -197,9 +206,75 @@
 .dup-rule-content{padding:0 14px 14px}
 .dup-rule-intro{font-size:12px;color:#909399;line-height:1.6;margin:0 0 10px}
 .dup-rule-table-wrap{overflow-x:auto}
-.dup-rule-table{width:100%;border-collapse:collapse;font-size:12px;line-height:1.65;min-width:650px}
+.dup-rule-table{width:100%;border-collapse:collapse;font-size:12px;line-height:1.65;table-layout:fixed}
 .dup-rule-table th,.dup-rule-table td{border:1px solid #ebeef5;padding:8px 10px;text-align:left;vertical-align:top}
 .dup-rule-table th{background:#f5f7fa;color:#606266;font-weight:600;white-space:nowrap}
-.dup-rule-table td:nth-child(2){white-space:nowrap;font-weight:600}
+.dup-rule-table th:nth-child(1){width:118px}
+.dup-rule-table th:nth-child(2){width:52%}
+/* 判定结果列按 rowspan 合并，纵向居中 */
+.dup-rule-table td.dup-rule-result-cell{text-align:center;vertical-align:middle;background:#fafbfc}
 .dup-rule-tag{display:inline-block;padding:1px 7px;border-radius:3px;background:#f4f4f5;color:#606266}
-.dup-rule-tag.same{background:#fef0f0;color:#f56c6c}.dup-rule-tag.style{background:#f4f0ff;color:#8b65c7}.dup-rule-tag.suspected{background:#fdf6ec;color:#e6a23c}.dup-rule-tag.none{background:#f0f9eb;color:#67c23a}
+/* 判定结果标签降饱和：保留区分度，但不再抢规则正文的注意力 */
+/* 与报告弹窗里比对明细的结果标签保持同一套配色（同款不用紫色） */
+.dup-rule-tag.same{background:#fdf2f2;color:#bf5f5f}.dup-rule-tag.style{background:#fdf8ef;color:#a9782f}.dup-rule-tag.suspected{background:#fdfaec;color:#8f7a2e}.dup-rule-tag.none{background:#f4f4f5;color:#909399}
+.dup-rule-note{font-size:12px;color:#909399;line-height:1.6;margin:0 0 10px}
+
+/* ---- 判定规则浮层（从弹窗底部折叠区改为按钮唤起） ---- */
+/* 报告弹窗内的视图切换：检测结果 / 判定规则。规则在同一弹窗内展示，不再叠一层浮层。 */
+.dup-modal-tabs{display:flex;gap:24px;border-bottom:1px solid #ebeef5;margin:-2px 0 14px}
+.dup-modal-tab{border:0;background:transparent;border-radius:0;padding:0 0 9px;font-size:13px;line-height:1.4;color:#606266;cursor:pointer;position:relative}
+.dup-modal-tab:hover{color:#219d94;border-color:transparent}
+.dup-modal-tab.active{color:#32b7ac;font-weight:600}
+.dup-modal-tab.active::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:#32b7ac}
+#dupTabRule{padding-top:2px}
+
+/* ---- 列表检测列：状态或构成在上，详情操作在下 ---- */
+.detection-cell-quick{gap:6px}
+/* 所有带操作的状态统一为上下两行，减少表格中横向散落的链接。 */
+.detection-cell-stack{flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px;padding-left:0}
+.dup-dash{color:#c8ccd1;font-size:13px;line-height:1;user-select:none}
+/* 兼容其他检测展示中可能使用的旧类名。 */
+.dup-clear{display:inline-flex;align-items:center;gap:3px;font-size:11px;line-height:1.3;color:#7fb069;white-space:nowrap}
+.detection-cell-center{align-items:center;justify-content:center;text-align:center;padding-left:0}
+
+/* 构成文字：整行同色同字号，不再区分标签与数字；主次只靠「正文灰 + 详情绿」。 */
+.dup-mix{display:inline-flex;align-items:baseline;gap:6px;font-size:12px;line-height:1.5;color:#606266;white-space:nowrap;font-variant-numeric:tabular-nums}
+.dup-mix-item{display:inline-flex;align-items:baseline;gap:3px}
+.dup-mix b{font-size:12px;font-weight:400;color:inherit}
+.dup-mix-dot{color:#c0c4cc;font-size:12px}
+/* 未检测 / 检测中 / 检测失败（含「未发现重复」）统一为同一档文字：12px、比正文 #606266 略淡 */
+.dup-state-text{display:inline-flex;align-items:center;gap:5px;font-size:12px;line-height:1.5;color:#7b818a;white-space:nowrap}
+.dup-state-muted{font-size:12px;line-height:1.5;color:#7b818a;white-space:nowrap}
+/* 「未发现重复」是检测结论，与「相同 2 · 同款 2」的结论文字同色 */
+.dup-state-text.is-conclusion{color:#606266}
+.dup-spinner-muted{width:14px;height:14px;flex:0 0 14px;border:0}
+
+/* 操作放在第二行，默认低对比度，悬停时再强调。 */
+.dup-link{border:0;background:transparent;padding:0;font-size:12px;line-height:1.4;color:#32b7ac;cursor:pointer;white-space:nowrap}
+.dup-link:hover{color:#219d94;text-decoration:underline}
+.dup-sku-link{color:#32b7ac;font-weight:500;text-decoration:none}
+.dup-sku-link:hover{color:#168e86;text-decoration:underline}
+
+/* ---- 候选较多时的筛选与分页 ---- */
+.dup-count-note{margin-left:8px;font-size:11px;color:#909399;font-weight:400}
+.dup-filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+.dup-filter-chip{border:1px solid #e4e7ed;background:#fff;color:#606266;border-radius:14px;padding:3px 11px;font-size:12px;cursor:pointer;line-height:1.6}
+.dup-filter-chip b{font-weight:500;margin-left:2px;color:#303133}
+.dup-filter-chip:hover{border-color:#8bd9d3;color:#1fa99f}
+.dup-filter-chip.active{background:#ecf8f7;border-color:#32b7ac;color:#1fa99f}
+.dup-filter-chip.active b{color:#1fa99f}
+.dup-pager{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 28px;font-size:12px;color:#909399;position:sticky;bottom:-18px;background:#fff;border-top:1px solid #ebeef5;margin-top:8px;margin-bottom:-18px;z-index:2;box-shadow:0 -6px 12px -8px rgba(0,0,0,.18)}
+.dup-pager-btns{display:flex;gap:6px}
+.dup-result-tag.none{background:#f4f4f5;color:#909399}
+
+/* ---- 候选主图放大预览 ---- */
+.dup-zoomable{cursor:zoom-in}
+.dup-img-viewer{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:1300;padding:36px}
+.dup-img-viewer.show{display:flex}
+.dup-img-viewer-inner{position:relative;max-width:min(880px,92vw);display:flex;flex-direction:column;align-items:center;gap:10px}
+.dup-img-viewer-inner img{width:min(340px,80vw);height:auto;max-height:66vh;object-fit:contain;background:#fff;border-radius:4px;padding:12px}
+.dup-img-close{position:absolute;top:-32px;right:0;background:transparent;border:0;color:#fff;font-size:22px;line-height:1;cursor:pointer;padding:0 4px}
+.dup-img-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.16);border:0;color:#fff;font-size:24px;width:36px;height:54px;border-radius:4px;cursor:pointer;line-height:1}
+.dup-img-nav:hover{background:rgba(255,255,255,.32)}
+.dup-img-nav.prev{left:-48px}
+.dup-img-nav.next{right:-48px}
