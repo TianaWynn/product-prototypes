@@ -664,33 +664,20 @@ function detectionModalFooter(id,mode){
     return `<div class="dup-reason-hover" tabindex="0" data-full-reason="${escapeHtml(full)}">${inner}</div>`;
   }
   /* 判定规则：先给判定结果，再按结果分块列出具体判断条件（口径与 Skill 一致）。 */
+  /* 判定规则：几句话讲清「判定顺序 + 四类结果」，不再铺 11 条条件组合表。 */
   function rulesReference(){
-    const groups=[
-      ['相同产品','same',[
-        ['标题主体一致 + 外形主体一致 + 供应商编码一致 + 采购价整数部分一致','供应商和采购价一致，基本可认为是同一产品'],
-        ['标题主体一致 + 外形主体一致 + 尺寸 / 重量 / 材质 / 功能基本一致','关键规格字段基本一致，基本可认为是同一产品']
-      ]],
-      ['同款产品','style',[
-        ['标题主体一致 + 外形主体一致，但供应商 / 采购价、尺寸 / 重量 / 材质 / 功能均未达到相同产品判断标准','标题和外形一致，但未满足相同产品条件，按同款产品处理']
-      ]],
-      ['疑似重复','suspected',[
-        ['标题主体一致 + 外形主体不一致','标题主体一致，但外形不一致，需人工复核'],
-        ['标题主体一致 + 外形主体无法确认','标题主体一致，但图片不足以确认外形，需人工复核'],
-        ['标题主体不一致 + 外形主体一致','外形主体一致，但标题主体不一致，需人工复核'],
-        ['标题主体无法比较 + 外形主体一致','仅输入图片时，标题无法参与判断，最多判为疑似重复，需人工复核']
-      ]],
-      ['非重复','none',[
-        ['标题主体不一致 + 外形主体不一致','标题和外形均不同'],
-        ['标题主体不一致 + 外形主体无法确认','标题主体不一致，且图片无法提供有效相似依据'],
-        ['标题主体无法比较 + 外形主体不一致','仅输入图片，且外形主体不一致'],
-        ['标题主体无法比较 + 外形主体无法确认','仅输入图片，且外形无法确认，无有效相似依据']
-      ]]
+    const items=[
+      ['相同产品','same','标题主体和外形主体都一致，并且供应商编码与采购价整数部分一致，或尺寸、重量、材质、功能基本一致。','建议合并，保留已有产品。'],
+      ['同款产品','style','标题主体和外形主体都一致，但供应商/采购价、关键规格都没对上。','不直接删除，人工确认后再决定是否合并。'],
+      ['疑似重复','suspected','标题主体和外形主体只有一项能对上，另一项不一致或图片无法确认。','系统不下结论，需要人工复核。'],
+      ['非重复','none','标题主体和外形主体都对不上。','正常开品，无需处理。']
     ];
-    // 单张大表：判定结果列用 rowspan 合并，一类只出现一次。
-    const rows=groups.map(([result,kind,rules])=>rules.map(([condition,note],i)=>`<tr>${
-      i===0?`<td class="dup-rule-result-cell" rowspan="${rules.length}"><span class="dup-rule-tag ${kind}">${result}</span></td>`:''
-    }<td>${condition}</td><td>${note}</td></tr>`).join('')).join('');
-    return `<div class="dup-rule-note">以下为系统检测判定口径，具体结果以本次检测报告为准。</div><div class="dup-rule-table-wrap"><table class="dup-rule-table"><thead><tr><th>判定结果</th><th>判断条件</th><th>说明</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    const body=items.map(([name,kind,desc,advice])=>
+      `<div class="dup-rule-line"><span class="dup-rule-tag ${kind}">${name}</span><span class="dup-rule-line-text">${desc}<b>${advice}</b></span></div>`
+    ).join('');
+    return `<div class="dup-rule-note">以下为系统检测判定口径，具体结果以本次检测报告为准。</div>
+      <div class="dup-rule-lead">系统先比对标题主体和外形主体，两项都一致才会继续比对采购价与关键规格。</div>
+      <div class="dup-rule-lines">${body}</div>`;
   }
   /* 报告弹窗内切换「检测结果 / 判定规则」，规则不再单独开一层浮层，避免弹窗套弹窗。 */
   window.switchDupTab=function(name){

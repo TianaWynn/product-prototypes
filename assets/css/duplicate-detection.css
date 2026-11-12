@@ -205,19 +205,17 @@
 .dup-rule-reference[open] summary::after{content:'收起 −'}
 .dup-rule-content{padding:0 14px 14px}
 .dup-rule-intro{font-size:12px;color:#909399;line-height:1.6;margin:0 0 10px}
-.dup-rule-table-wrap{overflow-x:auto}
-.dup-rule-table{width:100%;border-collapse:collapse;font-size:12px;line-height:1.65;table-layout:fixed}
-.dup-rule-table th,.dup-rule-table td{border:1px solid #ebeef5;padding:8px 10px;text-align:left;vertical-align:top}
-.dup-rule-table th{background:#f5f7fa;color:#606266;font-weight:600;white-space:nowrap}
-.dup-rule-table th:nth-child(1){width:118px}
-.dup-rule-table th:nth-child(2){width:52%}
-/* 判定结果列按 rowspan 合并，纵向居中 */
-.dup-rule-table td.dup-rule-result-cell{text-align:center;vertical-align:middle;background:#fafbfc}
 .dup-rule-tag{display:inline-block;padding:1px 7px;border-radius:3px;background:#f4f4f5;color:#606266}
 /* 判定结果标签降饱和：保留区分度，但不再抢规则正文的注意力 */
 /* 与报告弹窗里比对明细的结果标签保持同一套配色（同款不用紫色） */
 .dup-rule-tag.same{background:#fdf2f2;color:#bf5f5f}.dup-rule-tag.style{background:#fdf8ef;color:#a9782f}.dup-rule-tag.suspected{background:#fdfaec;color:#8f7a2e}.dup-rule-tag.none{background:#f4f4f5;color:#909399}
 .dup-rule-note{font-size:12px;color:#909399;line-height:1.6;margin:0 0 10px}
+/* 判定规则改成几句话：总述 + 四类结果各一行 */
+.dup-rule-lead{font-size:12px;color:#606266;line-height:1.8;margin:0 0 12px}
+.dup-rule-lines{display:flex;flex-direction:column;gap:9px}
+.dup-rule-line{display:flex;align-items:flex-start;gap:10px;font-size:12px;line-height:1.8;color:#606266}
+.dup-rule-line .dup-rule-tag{flex:0 0 64px;margin-top:3px;text-align:center}
+.dup-rule-line-text b{font-weight:600;color:#303133}
 
 /* ---- 判定规则浮层（从弹窗底部折叠区改为按钮唤起） ---- */
 /* 报告弹窗内的视图切换：检测结果 / 判定规则。规则在同一弹窗内展示，不再叠一层浮层。 */
