@@ -155,3 +155,65 @@ duplicateDetectionData['PHK_3EAU']={taskState:'timeout',taskId:'DEMO-T-01',statu
 
 /* 数据访问：按 id 取 SPU 记录 */
 function getSpu(id){return spuData.find(x=>x.id===id)}
+
+/* 利润列展示：公司 / 备货人 / 分销人三个视角，从同一份基础利润率派生，统一显示为区间。 */
+function profitCell(text,index){
+  const base=String(text||'');
+  const offsets=[0,-0.4,-1.1];
+  const off=offsets[index]||0;
+  return base.replace(/([\d.]+)%/g,function(m,v){
+    const n=parseFloat(v);
+    if(isNaN(n))return m;
+    const lo=Math.max(0,n+off);
+    const hi=Math.max(0,n+1.2);
+    return lo.toFixed(1)+'% ~ '+hi.toFixed(1)+'%';
+  });
+}
+
+/* 表格后段业务列（模拟数据）：SKU/SPU立项运营、SKU数量、BOM单、关联样品质检、
+   说明书、商品报价单、创建时间、关联项目时间、创建开发人、当前开发人。
+   顺序与正式系统页面一致；数据为演示用，按 SPU 稳定派生，保证两种列表渲染路径结果相同。 */
+const bizSamples = [
+  ['',       '',       1, 0, '未上传', '未上传', 0, '2026-11-12', '09:23:09', '09:23:21', '王丽君', '叶志斌'],
+  ['',       '',       1, 0, '未上传', '未上传', 0, '2026-11-12', '09:05:41', '09:05:51', '王丽君', '叶志斌'],
+  ['孙悦02', '孙悦02', 3, 1, '未上传', '未上传', 1, '2026-08-20', '10:19:29', '10:19:31', '叶志斌', '叶志斌'],
+  ['于瑞楠', '于瑞楠', 3, 1, '下载',   '已驳回', 1, '2026-05-11', '16:31:25', '16:31:26', '叶志斌', '叶志斌'],
+  ['黎嘉慧', '黎嘉慧', 3, 1, '未上传', '未上传', 1, '2025-11-12', '14:18:57', '14:18:59', '叶志斌', '叶志斌'],
+  ['王丽君', '王丽君', 4, 1, '下载',   '已驳回', 1, '2026-07-17', '21:33:51', '21:33:55', '孔曼娜', '叶志斌'],
+  ['周婧怡', '周婧怡', 2, 1, '未上传', '未上传', 1, '2026-06-03', '15:42:10', '15:42:16', '叶志斌', '孔曼娜'],
+  ['陈嘉豪', '陈嘉豪', 5, 1, '下载',   '已驳回', 1, '2026-04-28', '11:07:33', '11:07:41', '叶志斌', '叶志斌'],
+  ['李媛萌', '李媛萌', 3, 0, '未上传', '未上传', 0, '2026-03-15', '09:51:02', '09:51:08', '王丽君', '孔曼娜']
+];
+const bizRowOrder = ['PHK_3ERU','PHK_3CAR','PHK_3ES4','PHK_3EPC','PHK_3ECA','PHK_3ERY','PHK_3ERV','PHK_3ERT','PHK_3EPQ'];
+
+function bizFileLink(text){
+  const icon = text === '下载'
+    ? '<svg class="biz-file-icon" viewBox="0 0 12 14" aria-hidden="true"><path d="M1.2.8h6.4l3.2 3.2v9.2H1.2z"/><path d="M7.6.8v3.2h3.2M3.2 7.4h5M3.2 9.4h5"/></svg>'
+    : '';
+  return `<a class="biz-file-link" href="javascript:void(0)" onclick="toast('演示原型：附件下载未接入')">${text}${icon}</a>`;
+}
+
+function spuBizCells(spu){
+  let i = bizRowOrder.indexOf(spu && spu.id);
+  if (i < 0) {
+    let h = 7; const s = (spu && spu.id) || '';
+    for (let k = 0; k < s.length; k++) h = (h * 33 + s.charCodeAt(k)) >>> 0;
+    i = h % bizSamples.length;
+  }
+  const d = bizSamples[i % bizSamples.length];
+  const manualTag = `<span class="biz-state-tag"><span class="biz-state-dot">i</span>${d[5]}</span>`;
+  const time = t => `<span class="biz-time">${d[7]}<br>${t}</span>`;
+  return [
+    `<td class="biz-cell">${d[0]}</td>`,
+    `<td class="biz-cell">${d[1]}</td>`,
+    `<td class="biz-cell">${d[2]}</td>`,
+    `<td class="biz-cell">${d[3] ? bizFileLink('下载') : '<span class="biz-na">无</span>'}</td>`,
+    `<td class="biz-cell"><span class="biz-na">-</span></td>`,
+    `<td class="biz-cell"><div class="biz-manual-inner">${bizFileLink(d[4])}${manualTag}</div></td>`,
+    `<td class="biz-cell">${d[6] ? bizFileLink('下载') : '<span class="biz-na">无</span>'}</td>`,
+    `<td class="biz-cell">${time(d[8])}</td>`,
+    `<td class="biz-cell">${time(d[9])}</td>`,
+    `<td class="biz-cell">${d[10]}</td>`,
+    `<td class="biz-cell">${d[11]}</td>`
+  ].join('');
+}
