@@ -1,0 +1,789 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>重复品检测｜产品方案 V1.0</title>
+<style>
+  :root { --bg:#f3f5f9; --paper:#fff; --ink:#182b45; --body:#263953; --muted:#62738b; --line:#dbe3ed; --head:#f1f5fa; --teal:#087f83; --teal-soft:#e8f6f5; --amber:#a96c11; --amber-soft:#fff5e4; --red:#a94449; --red-soft:#fff0f1; --green:#287452; --green-soft:#eaf7ef; }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; background:var(--bg); color:var(--body); font:14px/1.78 "Microsoft YaHei","PingFang SC","Noto Sans CJK SC",sans-serif; }
+  .shell { display:grid; grid-template-columns:240px minmax(0,1fr); gap:24px; max-width:1500px; margin:auto; padding:26px; align-items:start; }
+  .toc { position:sticky; top:25px; max-height:calc(100vh - 50px); overflow:auto; padding:22px 15px; border:1px solid var(--line); border-radius:15px; background:var(--paper); box-shadow:0 10px 28px rgba(27,53,86,.05); }
+  .toc-title { padding:0 7px 12px; border-bottom:1px solid var(--line); color:var(--ink); font-size:15px; font-weight:700; }
+  .toc small { display:block; margin-top:3px; color:var(--muted); font-size:11px; font-weight:400; }
+  .toc-group { margin:14px 7px 4px; color:var(--teal); font-size:12px; font-weight:700; }
+  .toc a { display:block; padding:5px 8px; border-radius:6px; color:#536781; text-decoration:none; line-height:1.45; }
+  .toc a:hover,.toc a.active { color:var(--teal); background:var(--teal-soft); }
+  .toc a.sub { padding-left:20px; font-size:12px; }
+  main { min-width:0; }
+  .cover,.panel { margin-bottom:20px; padding:26px 28px; border:1px solid var(--line); border-radius:15px; background:var(--paper); box-shadow:0 10px 28px rgba(27,53,86,.045); }
+  .cover { padding:32px 34px; }
+  .kicker { color:var(--teal); font-size:12px; font-weight:700; letter-spacing:.07em; }
+  h1 { margin:8px 0 12px; color:var(--ink); font-size:29px; line-height:1.4; }
+  .deck { margin:0; max-width:920px; color:var(--muted); font-size:15px; }
+  .cover-meta { display:flex; flex-wrap:wrap; gap:9px; margin-top:18px; }
+  .tag { display:inline-flex; align-items:center; padding:2px 9px; border-radius:5px; background:#edf2f7; color:#52657b; font-size:11px; font-weight:700; white-space:nowrap; }
+  .tag.proposal { background:var(--teal-soft); color:var(--teal); }
+  .tag.pending { background:var(--amber-soft); color:var(--amber); }
+  .summary { margin-top:22px; padding:14px 17px; border-left:4px solid var(--teal); border-radius:5px; background:var(--teal-soft); color:var(--ink); font-size:15px; font-weight:600; }
+  .panel[id],h3[id] { scroll-margin-top:24px; }
+  h2 { margin:0 0 12px; color:var(--ink); font-size:21px; line-height:1.5; }
+  h3 { margin:22px 0 9px; color:var(--ink); font-size:16px; line-height:1.5; }
+  h4 { margin:18px 0 6px; color:var(--ink); font-size:14px; }
+  p { margin:8px 0; }
+  ul,ol { margin:8px 0; padding-left:1.5em; }
+  li { margin:4px 0; }
+  strong { color:var(--ink); }
+  code { padding:1px 5px; border-radius:4px; background:#eef3f8; color:#1f4a6b; font-family:Consolas,Monaco,monospace; font-size:12px; }
+  .section-lead { margin-top:0; color:var(--muted); }
+  .note { margin:14px 0; padding:11px 15px; border-left:3px solid var(--amber); border-radius:5px; background:var(--amber-soft); font-size:13px; }
+  .note.teal { border-color:var(--teal); background:var(--teal-soft); }
+  .note.red { border-color:var(--red); background:var(--red-soft); }
+  .table-wrap { margin:12px 0 16px; overflow-x:auto; border:1px solid var(--line); border-radius:10px; }
+  table { width:100%; border-collapse:collapse; text-align:left; }
+  th { padding:9px 12px; background:var(--head); color:#38516e; font-size:12px; font-weight:700; white-space:nowrap; }
+  td { padding:10px 12px; border-top:1px solid var(--line); vertical-align:top; font-size:13px; }
+  tr:nth-child(even) td { background:#fcfdff; }
+  td:first-child { color:var(--ink); font-weight:600; }
+  .wide { min-width:760px; }
+  tr.grp td { background:#f6fafd; }
+  tr.grp td[rowspan] { background:#eaf3fa; font-weight:700; }
+  .chip { display:inline-flex; align-items:center; gap:5px; padding:1px 8px; border-radius:20px; font-size:11px; font-weight:700; white-space:nowrap; }
+  .chip.gray { background:#eef2f7; color:#63748a; }
+  .chip.dashed { background:#f4f4f5; color:#8d96a3; border:1px dashed #c9cfd8; }
+  .chip.blue { background:#eaf1fb; color:#2f5f9e; }
+  .chip.red { background:var(--red-soft); color:var(--red); }
+  .chip.amber { background:var(--amber-soft); color:var(--amber); }
+  .chip.yellow { background:#fffbe6; color:#9a7900; }
+  .chip.green { background:var(--green-soft); color:var(--green); }
+  .flow { display:flex; flex-wrap:wrap; gap:8px; align-items:stretch; margin:14px 0; }
+  .flow .node { flex:1 1 120px; padding:9px 11px; border:1px solid var(--line); border-radius:7px; background:#fbfcfe; color:var(--ink); text-align:center; font-size:12px; font-weight:700; }
+  .flow .arrow { align-self:center; color:#95a4b5; font-size:18px; }
+  .flowchart { margin:16px 0 20px; padding:14px 10px; border:1px solid var(--line); border-radius:12px; background:#fff; overflow-x:auto; }
+  .flowchart img { display:block; width:100%; max-width:1040px; margin:0 auto; height:auto; }
+  .flowchart figcaption { margin-top:8px; padding:0 6px; color:var(--muted); font-size:12px; }
+  .shot { margin:16px 0 20px; padding:0; }
+  .shot-ph { display:grid; place-items:center; min-height:150px; padding:22px; border:1.5px dashed #c2cddc; border-radius:10px; background:#fafcff; color:#8a99ac; font-size:12.5px; text-align:center; line-height:1.8; }
+  .shot-ph b { display:block; margin-bottom:4px; color:#5b6d84; font-size:13px; }
+  .shot figcaption { margin-top:7px; color:var(--muted); font-size:12px; }
+  .shot img { display:block; width:100%; height:auto; border:1px solid var(--line); border-radius:10px; box-shadow:0 2px 10px rgba(27,53,86,.06); }
+  .shot.narrow img { max-width:780px; }
+  .shot.narrow { max-width:780px; }
+  .shot-pair { display:flex; gap:14px; margin:14px 0 18px; flex-wrap:wrap; }
+  .shot-pair > div { flex:1 1 300px; min-width:260px; display:flex; flex-direction:column; }
+  .shot-pair img { display:block; width:100%; height:120px; object-fit:contain; object-position:left center; background:#fff; border:1px solid var(--line); border-radius:8px; box-shadow:0 2px 10px rgba(27,53,86,.06); }
+  .shot-pair span { display:block; margin-top:auto; padding-top:8px; color:var(--muted); font-size:12px; }
+  .cat-list { margin:8px 0 2px; padding-left:20px; color:var(--muted); font-size:12.5px; line-height:1.95; }
+  .cat-list li { margin:0; }
+  .modal-grid { display:grid; gap:16px; margin:14px 0 4px; }
+  .decision { counter-reset:d; list-style:none; padding-left:0; }
+  .decision li { position:relative; margin:0; padding:12px 8px 12px 34px; border-bottom:1px solid var(--line); }
+  .decision li::before { counter-increment:d; content:counter(d); position:absolute; left:3px; top:12px; display:grid; width:22px; height:22px; place-items:center; border-radius:50%; background:var(--amber-soft); color:var(--amber); font-size:12px; font-weight:700; }
+  .decision li:last-child { border-bottom:0; }
+  .fine { color:var(--muted); font-size:12px; }
+  .foot { margin:8px 0 0; padding:10px 2px 40px; color:var(--muted); font-size:12px; }
+  details.codebox { margin:14px 0 18px; border:1px solid var(--line); border-radius:10px; background:#fbfcfe; }
+  details.codebox > summary { padding:11px 15px; color:var(--teal); font-size:13px; font-weight:700; cursor:pointer; list-style:none; user-select:none; }
+  details.codebox > summary::-webkit-details-marker { display:none; }
+  details.codebox > summary::before { content:"\25B8"; margin-right:7px; }
+  details.codebox[open] > summary::before { content:"\25BE"; }
+  details.codebox > summary:hover { background:var(--teal-soft); border-radius:10px; }
+  details.codebox pre { margin:0; padding:15px 17px; border-top:1px solid var(--line); overflow-x:auto; background:#f7fafd; }
+  details.codebox code { display:block; padding:0; background:none; color:#2a4360; font:12px/1.75 Consolas,Monaco,monospace; white-space:pre; }
+  @media (max-width:1000px) { .shell { grid-template-columns:200px minmax(0,1fr); gap:15px; padding:15px; } .panel,.cover { padding:21px; } }
+  @media (max-width:760px) { .shell { display:block; padding:10px; } .toc { position:sticky; top:0; z-index:5; max-height:none; margin-bottom:10px; padding:8px 10px; } .toc-title small,.toc-group { display:none; } .toc nav { display:flex; overflow-x:auto; gap:3px; white-space:nowrap; } .toc a { flex:0 0 auto; padding:5px 7px; font-size:11px; } .cover,.panel { padding:17px; } h1 { font-size:23px; } }
+  @media print { body { background:#fff; } .shell { display:block; max-width:none; padding:0; } .toc { display:none; } .cover,.panel { box-shadow:none; break-inside:avoid; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="toc">
+    <div class="toc-title">重复品检测<small>产品方案 V1.0 · 一期</small></div>
+    <nav>
+      <div class="toc-group">背景</div>
+      <a href="#changelog">版本记录</a>
+      <a href="#bg">一、背景与目标</a>
+      <a href="#bg-1" class="sub">（一）背景</a>
+      <a href="#bg-2" class="sub">（二）目标</a>
+      <a href="#capability">二、重复开品检测能力</a>
+      <a href="#cap-1" class="sub">（一）能力边界</a>
+      <a href="#cap-2" class="sub">（二）检测流程</a>
+      <a href="#cap-3" class="sub">（三）判定规则</a>
+      <a href="#cap-4" class="sub">（四）输出结果</a>
+      <a href="#cap-5" class="sub">（五）检测说明全文</a>
+      <div class="toc-group">产品方案</div>
+      <a href="#entry">三、入口</a>
+      <a href="#state">四、检测状态</a>
+      <a href="#state-1" class="sub">（一）状态模型</a>
+      <a href="#state-2" class="sub">（二）状态判定</a>
+      <a href="#state-3" class="sub">（三）列表展示规则</a>
+      <a href="#detail">五、状态详情与弹窗</a>
+      <a href="#detail-1" class="sub">（一）检测中</a>
+      <a href="#detail-2" class="sub">（二）未检测</a>
+      <a href="#detail-3" class="sub">（三）检测成功：看三类构成</a>
+      <a href="#detail-4" class="sub">（四）检测失败</a>
+      <a href="#trigger">六、触发规则</a>
+      <a href="#trigger-1" class="sub">（一）首次自动触发</a>
+      <a href="#trigger-2" class="sub">（二）关键信息变化重检</a>
+      <a href="#trigger-3" class="sub">（三）手动触发</a>
+      <a href="#trigger-4" class="sub">（四）不触发的情况</a>
+      <a href="#perm">七、权限</a>
+      <div class="toc-group">落地</div>
+      <a href="#fields">八、数据字段（建议）</a>
+      <a href="#fields-1" class="sub">（一）检测任务表</a>
+      <a href="#fields-2" class="sub">（二）检测明细表</a>
+      <a href="#fields-3" class="sub">（三）变更记录表</a>
+      <a href="#fields-4" class="sub">（四）系统侧校验</a>
+      <a href="#next">九、后续规划</a>
+      <a href="#next-1" class="sub">（一）近期</a>
+      <a href="#next-2" class="sub">（二）暂不做</a>
+      <a href="#next-3" class="sub">（三）上线后关注指标</a>
+      <a href="#next-4" class="sub">（四）一期预留</a>
+    </nav>
+  </aside>
+
+  <main>
+    <section class="cover">
+      <div class="kicker">品牌开发系统 · 重复品检测</div>
+      <h1>重复品检测 · 产品方案</h1>
+      <p class="deck">把现在只能在对话里跑的重复开品检测 Skill 接进 ERP，在项目 SPU 列表上直接给出结论。系统负责流程与规则，模型只负责「标题像不像、外形像不像」。</p>
+      <div class="cover-meta">
+        <span class="tag proposal">新建 · 待评审</span>
+        <span class="tag">一期方案</span>
+        <span class="tag">V1.0</span>
+        <span class="tag">2026-11-13</span>
+      </div>
+      <div class="summary">一句话：检测结果跟着 SPU 走，列表上只占一处展示——有重复时直接写三类构成，其余写检测状态；该检的自动检，不该检的显示「无需检测」，没有记录的显示「未检测」——后两种不落库，查询时现算。</div>
+    </section>
+
+    <!-- ============ 版本记录 ============ -->
+    <section class="panel" id="changelog">
+      <h2>版本记录</h2>
+      <div class="table-wrap">
+        <table class="wide">
+          <thead><tr><th>版本</th><th>日期</th><th>状态</th><th>变更内容</th></tr></thead>
+          <tbody>
+            <tr><td>V1.0</td><td>2026-11-13</td><td><span class="chip gray">新建</span></td><td>新建。尚未评审。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>相关文件</strong></p>
+      <div class="table-wrap">
+        <table class="wide">
+          <thead><tr><th>文件</th><th>内容</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://tianawynn.github.io/product-prototypes/" target="_blank">https://tianawynn.github.io/product-prototypes/</a></td><td>交互原型（当前版本），本方案的页面截图均取自这里，可直接点开走一遍</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 一 背景 ============ -->
+    <section class="panel" id="bg">
+      <h2>一、背景与目标</h2>
+
+      <h3 id="bg-1">（一）背景</h3>
+      <p>为规范系统内项目的开品管理，减少同一款产品被重复创建为多个 SPU 的情况。重复开品会带来备货与产品资料的重复维护，也会造成返点归属冲突。</p>
+      <p>系统内已具备重复开品检测能力，覆盖从候选召回到重复判定的完整流程。但当前仅支持对话调用，需人工发起，检测时点与检测对象依赖人工判断，使用情况只能通过定期拉取对话数据获得。</p>
+      <p>检测结果不落系统，触发人、时间、候选范围与判断依据均无记录。项目内哪些产品查过、结论如何，无法统一查看，也无法统计重复情况。</p>
+
+      <h3 id="bg-2">（二）目标</h3>
+      <p>把检测能力接入系统，随 SPU 创建自动执行，使项目内每个 SPU 都有统一的检测记录与结论，实现项目范围的统一管理与校验。</p>
+      <ul>
+        <li><strong>能看见</strong>：项目详情页 SPU 列表新增「重复品检测」列，无需主动查询即可获知重复情况。</li>
+        <li><strong>能追溯</strong>：每次检测的触发来源、触发时间、候选范围与判断依据均可回溯。</li>
+        <li><strong>能评估</strong>：上线后可统计重复率，以及重复率与品类的交叉分布，判断重复集中在哪些品类，作为推广范围与管控重点的依据。</li>
+      </ul>
+    </section>
+
+    <!-- ============ 二 能力 ============ -->
+    <section class="panel" id="capability">
+      <h2>二、重复开品检测能力</h2>
+      <p class="section-lead">本章说明现有检测能力能做什么、按什么规则判、返回什么结果。接进系统时，这些口径原样沿用，不改判断逻辑。</p>
+
+      <h3 id="cap-1">（一）能力边界</h3>
+      <p>同一套判断逻辑，两种调用方式，差别只在<strong>输入</strong>和<strong>谁发起</strong>。</p>
+      <div class="table-wrap">
+        <table class="wide">
+          <thead><tr><th>使用方式</th><th>输入</th><th>输出</th><th>谁发起</th></tr></thead>
+          <tbody>
+            <tr><td>对话场景</td><td>SKU / SPU 编码、产品标题、产品图片，单目标或多目标</td><td>检测报告 + 结构化 JSON</td><td>人在对话里主动查询</td></tr>
+            <tr><td>系统场景（接入 ERP）</td><td>SPU 编码，每次一个目标</td><td>只返回结构化 JSON</td><td>系统按触发规则自动发起</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>召回口径、判定规则、三档结论两边完全一致。系统侧只是把输入收窄成 SPU、输出收窄成 JSON，判断逻辑不变。</p>
+
+      <h3 id="cap-2">（二）检测流程</h3>
+      <figure class="flowchart">
+        <img src="img/11-flow.png" alt="重复开品检测判断流程">
+        <figcaption>输入 SKU / SPU 取目标信息后，按标题、图片两路召回；过滤自身与关联组、地毯品类、配件与服装品线后，逐候选比标题与外形，再比价格与规格，输出相同 / 同款 / 疑似 / 非重复四类。</figcaption>
+      </figure>
+
+      <h3 id="cap-3">（三）判定规则</h3>
+      <p>先看标题和外形两个主体，两个都一致时才用价格和规格区分「相同」还是「同款」。</p>
+      <div class="table-wrap">
+        <table class="wide">
+          <thead><tr><th>标题主体</th><th>外形主体</th><th>补充条件</th><th>结果</th></tr></thead>
+          <tbody>
+            <tr><td>一致</td><td>一致</td><td>供应商编码一致，或采购价整数部分一致</td><td><span class="chip red">相同产品</span></td></tr>
+            <tr><td>一致</td><td>一致</td><td>尺寸 / 重量 / 材质 / 功能基本一致（尺寸重量 ±5%）</td><td><span class="chip red">相同产品</span></td></tr>
+            <tr><td>一致</td><td>一致</td><td>以上都不满足</td><td><span class="chip amber">同款产品</span></td></tr>
+            <tr><td>一致</td><td>不一致</td><td>—</td><td><span class="chip yellow">疑似重复</span></td></tr>
+            <tr><td>一致</td><td>无法确认</td><td>图片读不到或缺失</td><td><span class="chip yellow">疑似重复</span></td></tr>
+            <tr><td>不一致</td><td>一致</td><td>—</td><td><span class="chip yellow">疑似重复</span></td></tr>
+            <tr><td>不一致</td><td>不一致 / 无法确认</td><td>—</td><td>非重复</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="fine">系统场景输入固定是 SPU，标题一定存在，不会出现「标题主体无法比较」，所以这里只列七种组合。对话场景仅输入图片时会多出三种（标题无法比较 × 外形一致 / 不一致 / 无法确认），结论落在疑似或非重复，不影响系统侧。</p>
+
+      <h3 id="cap-4">（四）输出结果</h3>
+      <p class="section-lead">对话场景出检测报告，系统场景只返回结构化 JSON。两者数据同源，报告由 JSON 渲染。</p>
+
+      <h4>1. 检测报告（对话场景）</h4>
+      <p>单目标固定三段，顺序与列名不可改：<strong>目标产品</strong>（12 项基础资料）→ <strong>检测结果</strong>（相同 / 同款 / 疑似三张独立表）→ <strong>结论</strong>（是否存在重复开品、三类数量、建议处理）。三张表列不同：同款多一列「差异点」，疑似多「疑似原因」「需确认项」。</p>
+      <div class="shot">
+        <img src="img/10-report-dialog.png" alt="检测报告：目标产品与检测结果">
+        <figcaption>检测报告实际输出：目标产品 12 项资料 → 相同 / 同款 / 疑似三张独立表</figcaption>
+      </div>
+      <p class="fine">多目标时先出汇总表（<code># / 目标SPU / 目标SKU / 状态 / 相同 / 同款 / 疑似 / 结论</code> 固定 8 列），有重复或异常的目标再展开明细，无重复的只在汇总表出现。</p>
+
+      <h4>2. 结构化 JSON（系统场景）</h4>
+      <p>顶层是数组，单目标也返回长度 1 的数组，顺序与输入一致。<strong>返回的字段全部入库</strong>，区别只在用途——一部分直接驱动页面展示，一部分不在页面上出原值、留给筛选统计与事后排查。</p>
+      <p><strong>驱动页面渲染的：</strong>目标五项（<code>target_spu</code> / <code>target_sku</code> / <code>target_title</code> / <code>target_category</code> / <code>target_image</code>）定位并展示目标卡片；<code>status</code> 定成败；三类计数直接写进列表；<code>duplicate_items</code> 拆行写入检测明细；<code>summary</code> 不入页面，只入库供追溯与人工排查。</p>
+      <p><strong>不直接展示、但照样入库的：</strong><code>error_message</code> 记异常与降级原因，弹窗只区分「检测失败」并给固定文案，具体取值见「（五）检测说明全文」；<code>is_duplicate</code> 是有无重复的快捷标记，供列表筛选与重复率统计；<code>non_duplicate_spus</code> / <code>non_duplicate_count</code> 记比对范围，回答「这个 SPU 跟哪些比过」；<code>candidate_count</code> 用于校验。</p>
+      <p class="fine"><code>is_duplicate</code> 是「或」逻辑，相同或同款任一 &gt; 0 就返回「是」，一个「是」装不下三类构成。列表直接用三类计数，该字段只作筛选与统计的快捷口径。</p>
+      <div class="note teal">
+        <strong>计数以明细为准，系统自己数：</strong>相同 / 同款 / 疑似按 <code>duplicate_items</code> 里每条的 <code>duplicate_type</code> 统计；<code>non_duplicate_count</code> 取 <code>non_duplicate_spus</code> 的数组长度；<code>candidate_count</code> = 三者之和 + 非重复。返回的计数只作参考，与明细对不上时<strong>以明细为准重算</strong>，记一条 <code>error_message</code> 备注即可，不判检测失败。
+      </div>
+
+
+      <details class="codebox">
+        <summary>展开查看结构化 JSON 示例（单目标，明细只列 2 条示意）</summary>
+        <pre><code>[
+  {
+    "target_spu": "PHO_0ZO8",
+    "target_sku": "PHO_0ZO8P23T",
+    "target_title": "4抽三角纹面板 MDF+PB+铁 斗柜 白色",
+    "target_category": "家具/收纳家具/斗柜",
+    "target_image": "https://img.example.com/pho0zo8.jpg",
+    "status": "已完成",
+    "is_duplicate": "是",
+    "same_product_count": 0,
+    "same_style_count": 1,
+    "suspected_count": 1,
+    "non_duplicate_count": 3,
+    "non_duplicate_spus": ["PHO_5E6F", "PHO_7G8H", "PHO_9I0J"],
+    "candidate_count": 5,
+    "summary": "PHO_0ZO8（代表SKU PHO_0ZO8P23T，4抽三角纹面板 MDF+PB+铁 斗柜 白色）存在重复开品：1个同款产品（同系列三角纹面板斗柜的不同抽数/颜色）、1个疑似重复（面板纹理不同的抽屉柜），3个候选判为非重复；召回后另有4个候选因SKU生命周期不在0/1状态被过滤。",
+    "duplicate_items": [
+      {
+        "duplicate_type": "同款产品",
+        "similar_spu": "PHO_1A2B",
+        "similar_sku": "PHO_1A2BP11K",
+        "similar_title": "5抽三角纹面板 MDF+PB+铁 斗柜 黑色",
+        "similar_category": "家具/收纳家具/斗柜",
+        "similar_image": "https://img.example.com/pho1a2b.jpg",
+        "recall_source": "标题+图片",
+        "title_judgement": "标题主体一致",
+        "image_judgement": "外形主体一致",
+        "image_summary": "两者均为长方形柜体、直角柜脚，面板同为三角纹贴面，柜体比例接近",
+        "image_analysis_source": "模型视觉",
+        "reason": "标题主体同为三角纹面板斗柜，核心对象与用途一致；外形均为长方形柜体、三角纹面板、直角柜脚；供应商编码不同，采购价 189 与 175 不一致；抽数 4 抽与 5 抽，尺寸存在差异",
+        "reason_brief": "标题主体一致，外形主体一致，供应商/采购价存在差异，尺寸存在差异",
+        "difference": "抽数 4 抽 vs 5 抽，颜色白色 vs 黑色",
+        "suggestion": "可并存，按同款关联展示"
+      },
+      {
+        "duplicate_type": "疑似重复",
+        "similar_spu": "PHO_3C4D",
+        "similar_sku": "PHO_3C4DP08M",
+        "similar_title": "4抽平板面板 MDF+PB 斗柜 白色",
+        "similar_category": "家具/收纳家具/斗柜",
+        "similar_image": "https://img.example.com/pho3c4d.jpg",
+        "recall_source": "图片",
+        "title_judgement": "标题主体一致",
+        "image_judgement": "外形主体不一致",
+        "image_summary": "候选面板为平板无纹理，目标为三角纹贴面，面板形态不同",
+        "image_analysis_source": "模型视觉",
+        "reason": "标题主体同为 4 抽斗柜，核心对象与用途一致；外形上面板由三角纹贴面变为平板，主体形态不同",
+        "reason_brief": "标题主体一致，外形主体不一致",
+        "difference": "",
+        "suggestion": "人工确认是否为同一款"
+      }
+    ],
+    "error_message": ""
+  }
+]</code></pre>
+      </details>
+
+      <h3 id="cap-5">（五）检测说明全文</h3>
+      <p>下面这份是当前正式服版本的渲染稿，规则细节、字段口径、输出模板都在里面：</p>
+      <p><a href="SKILL-重复开品检测.html" target="_blank" style="display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border:1px solid var(--teal);border-radius:8px;background:var(--teal-soft);color:var(--teal);font-weight:700;text-decoration:none;">查看检测说明全文 →</a></p>
+      <p class="fine">源文件：<code>更改正式服main的skill/skill1_重复开品检测/SKILL.md</code>（渲染稿与本方案放在同一目录，离线可看）</p>
+    </section>
+
+    <!-- ============ 三 入口与列表 ============ -->
+    <section class="panel" id="entry">
+      <h2>三、入口</h2>
+      <p class="section-lead">位置：<strong>项目详情页 → SPU 列表 → 新增「重复品检测」列</strong>，位于「商品状态」列之后、「信息质量评分」列之前。</p>
+      <div class="shot">
+        <img src="img/01-spu-list.png" alt="项目详情页 SPU 列表，新增重复品检测列">
+        <figcaption>项目详情页 SPU 列表：红框处为新增的「重复品检测」列，位置在「商品状态」之后、「信息质量评分」之前</figcaption>
+      </div>
+    </section>
+
+    <!-- ============ 四 检测状态 ============ -->
+    <section class="panel" id="state">
+      <h2>四、检测状态</h2>
+      <p class="section-lead">列表上每种状态占两行：<strong>一个展示 + 一个动作</strong>。后台只记检测状态；有重复时直接展示三类计数，不合成结论标签。</p>
+
+      <h3 id="state-1">（一）状态模型</h3>
+      <ul>
+        <li><strong>页面检测状态</strong>：未检测 / 检测中 / 检测成功 / 检测失败 / 无需检测。只有检测中、检测成功、检测失败会写记录。</li>
+        <li><strong>三类计数</strong>：相同 / 同款 / 疑似，检测成功时才有值，直接决定列表上写什么。</li>
+      </ul>
+
+      <h3 id="state-2">（二）状态判定</h3>
+      <p>页面检测状态决定这次有没有跑完，三类计数决定跑出来是什么。只有「检测成功」才看计数，其余状态不产生构成。</p>
+      <div class="table-wrap">
+        <table class="wide">
+          <thead><tr><th>页面检测状态</th><th>判定条件</th><th>列表显示</th></tr></thead>
+          <tbody>
+            <tr><td>未检测</td><td>无任务记录，且未命中排除规则（不落库，查询时判定）</td><td><span class="chip gray">未检测</span> + 「立即检测」</td></tr>
+            <tr><td>检测中</td><td>已提交，未取得终态</td><td><span class="chip blue">◌ 检测中</span></td></tr>
+            <tr class="grp"><td rowspan="4" style="vertical-align:middle">检测成功</td><td>相同 &gt; 0（同款、疑似任意）</td><td><span class="chip red">相同 2 · 同款 2 · 疑似 2</span> + 「详情」</td></tr>
+            <tr class="grp"><td>相同 = 0，同款 &gt; 0</td><td><span class="chip amber">同款 1 · 疑似 1</span> + 「详情」</td></tr>
+            <tr class="grp"><td>相同 = 0、同款 = 0，疑似 &gt; 0</td><td><span class="chip yellow">疑似 1</span> + 「详情」</td></tr>
+            <tr class="grp"><td>三者均为 0</td><td><span class="chip green">未发现重复</span> + 「重新检测」</td></tr>
+            <tr><td>检测失败</td><td>查不到产品信息，或两路召回均失败、结果解析与校验不通过</td><td><span class="chip gray">检测失败</span> + 「重新检测」</td></tr>
+            <tr><td>无需检测</td><td>无任务记录，且命中排除规则（不落库，查询时判定）</td><td><span class="chip dashed">—</span> 横杠占位</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="fine">页面不显示结论词：有重复时直接写构成，三者全为 0 时写「未发现重复」。页面上叫「检测成功」，Skill 返回的 <code>status</code> 是「已完成」，落库时映射一次：<code>已完成</code> → 检测成功，<code>无产品信息</code> / <code>查询失败</code> → 检测失败（失败原因走列表悬浮，不另开弹窗）。</p>
+      <p class="fine">判断「有没有重复开品」看 <code>is_duplicate</code>（是 / 疑似 / 否），等价于「相同 + 同款 &gt; 0」。它只用于筛选与统计，不用于列表显示——一个三值字段装不下三类构成。</p>
+
+      <h3 id="state-3">（三）列表展示规则</h3>
+      <p>每种状态在列表上只有两行位置：<strong>上面是状态本身，下面是一个动作</strong>。构成与时间这类「看得懂但不需要点开」的信息，全部走悬浮，不占列表空间。悬浮统一为黑底白字、向上弹出，不出现鼠标旁的问号。</p>
+      <div class="table-wrap">
+        <table class="wide">
+          <thead><tr><th>状态</th><th>列表显示</th><th>悬浮文案</th><th>行内动作</th></tr></thead>
+          <tbody>
+            <tr><td>未检测</td><td>未检测</td><td>不出悬浮</td><td>立即检测</td></tr>
+            <tr><td>检测中</td><td>◌ 检测中</td><td>检测任务执行中 · 2026-11-04 14:13 发起</td><td>无（只读等待，避免重复提交）</td></tr>
+            <tr><td>检测成功，至少一项 &gt; 0</td><td>相同 2 · 同款 2 · 疑似 2</td><td>不出悬浮——构成直接写在行内，顺序固定「相同 → 同款 → 疑似」，为 0 的不显示</td><td>详情</td></tr>
+            <tr><td>未发现重复</td><td>未发现重复</td><td>未发现重复 · 检测时间 2026-11-04 14:12</td><td>重新检测</td></tr>
+            <tr><td>检测失败</td><td>检测失败</td><td>失败原因一句话 · 检测时间 2026-11-04 14:11</td><td>重新检测</td></tr>
+            <tr><td>无需检测</td><td>—（横杠）</td><td>命中排除规则的一句话，如「该 SPU 属于地毯类目，不参与重复品检测」</td><td>无（不提供弹窗）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>1. 检测中：悬浮看发起时间</h4>
+      <div class="shot">
+        <img src="img/14-tip-checking.png" style="max-width:610px" alt="检测中悬浮提示">
+        <figcaption>检测中：只读等待，不提供重检；悬浮补「发起时间」，回答「等了多久」</figcaption>
+      </div>
+
+      <h4>2. 未发现重复：悬浮看检测时间</h4>
+      <div class="shot">
+        <img src="img/15-tip-clear.png" style="max-width:610px" alt="未发现重复悬浮提示">
+        <figcaption>未发现重复：结论本身已经说清结果，悬浮只补检测时间；行内给「重新检测」</figcaption>
+      </div>
+      <p class="fine">非重复的比对条数属于过程数据，不放进悬浮。悬浮只回答「什么时候检的」，避免一条空结论也要开弹窗。</p>
+
+      <h4>3. 无需检测：悬浮看命中的规则</h4>
+      <div class="shot">
+        <img src="img/16-tip-skip.png" style="max-width:610px" alt="无需检测悬浮提示">
+        <figcaption>无需检测：横杠占位，不可点、没有弹窗；悬浮说明命中的是哪条排除规则</figcaption>
+      </div>
+
+      <div class="note red">
+        <strong>is_duplicate 不能拿来代替构成。</strong>它是「或」逻辑，相同或同款任一 &gt; 0 就返回「是」，会把「只有同款」和「有相同」混成一档；而列表要展示的是具体构成，一个「是」字装不下。该字段照常入库，只供筛选与统计使用。
+      </div>
+
+    </section>
+
+    <!-- ============ 五 状态详情与弹窗 ============ -->
+    <section class="panel" id="detail">
+      <h2>五、状态详情与弹窗</h2>
+      <p class="section-lead">只有「检测成功且有重复」会开弹窗，其余四种状态都在列表行内解决——<strong>状态 + 一个动作 + 悬浮</strong>。能一句话说清的，不做第二层。</p>
+
+      <h3 id="detail-1">（一）检测中：不开弹窗</h3>
+      <p>列表上只有「◌ 检测中」一行字，不可点、没有按钮——等待态没有可看的内容，弹窗只会把「请等待」再放大一遍。</p>
+      <ul>
+        <li>任务未回写前不提供重检入口，避免重复提交。</li>
+        <li>悬浮给「检测任务执行中 · 2026-11-04 14:13 发起」，与报告弹窗标题右侧的时间同一口径（示意见「四（三）1」）。</li>
+        <li>任务完成后这一行自动变成构成或结论，不需要人工刷新。</li>
+      </ul>
+
+      <h3 id="detail-2">（二）未检测：不开弹窗</h3>
+      <p>「未检测」= 没有检测记录、且不在排除范围，因此行内直接给「立即检测」。</p>
+      <ul>
+        <li>列表上点「立即检测」即创建任务，不弹确认框；发起后该行立即变「检测中」。</li>
+        <li>产品详情页的检测条走确认框，因为那里是「重新检测」为主，需要说明会保留历史报告。</li>
+        <li>不区分来源、也不落库：查不到检测记录就是未检测，页面统一显示「未检测」。</li>
+      </ul>
+      <p class="fine">为什么不自动触发，见「六、触发规则（四）」。</p>
+
+      <h3 id="detail-3">（三）检测成功：看三类构成</h3>
+      <p>「检测成功」之后还要看三类计数：构成不同，处理动作不同。四种构成共用同一个报告弹窗，靠<strong>列表上的构成</strong>与<strong>弹窗里的明细</strong>区分，头部不再重复挂一个 badge。</p>
+      <div class="shot">
+        <img src="img/04-report-duplicate.png" alt="检测报告弹窗，三类结果同时出现">
+        <figcaption>三类结果同时出现的场景：2 个相同产品、2 个同款产品、2 个疑似重复；标题右侧带检测时间</figcaption>
+      </div>
+
+      <h4>1. 头部：标题 + 检测时间</h4>
+      <p>标题固定为「重复品检测报告」，检测时间挂在标题右侧、灰色小字，形如 <code>检测时间 2026-11-04 14:10</code>。时间不占正文空间，也不单独占一行——它的作用是让人一眼判断「这个结论还新不新」，不需要展开任何内容。</p>
+      <p class="fine">检测中、未检测、检测失败都不开弹窗，没有标题行可以挂时间，所以「检测时间」只出现在有重复的报告弹窗上。</p>
+
+      <h4>2. 构成决定列表，不决定头部</h4>
+      <p>列表上直接写三类计数，顺序固定「相同 → 同款 → 疑似」，为 0 的不显示。四种构成由计数唯一决定：</p>
+      <div class="table-wrap">
+        <table class="wide">
+          <thead><tr><th>相同产品</th><th>同款产品</th><th>疑似重复</th><th>列表显示</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td>&gt; 0</td><td>任意</td><td>任意</td><td><span class="chip red">相同 2 · 同款 2 · 疑似 2</span></td><td>存在完全一致的品，处理动作为合并或删除</td></tr>
+            <tr><td>0</td><td>&gt; 0</td><td>任意</td><td><span class="chip amber">同款 1 · 疑似 1</span></td><td>同一款但存在差异，可并存，需说明差异点</td></tr>
+            <tr><td>0</td><td>0</td><td>&gt; 0</td><td><span class="chip yellow">疑似 1</span></td><td>判断依据不足，需人工确认</td></tr>
+            <tr><td>0</td><td>0</td><td>0</td><td><span class="chip green">未发现重复</span></td><td>已完成比对，无重复</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>3. 正文：目标产品 → 检测明细</h4>
+      <p>弹窗自上而下三段：<strong>目标产品</strong>（SPU / 代表 SKU / 主图 / 产品标题）→ <strong>检测明细</strong>（筛选 + 表格）→ 底部动作（重新检测）。</p>
+      <ul>
+        <li><strong>检测明细</strong>四字后面跟「判定规则」下拉入口，再下面是筛选条：全部 / 相同产品 / 同款产品 / 疑似重复，各带数量。</li>
+        <li>表格固定六列：<strong>检测结果 / SPU / 代表 SKU / 主图 / 产品标题 / 判断依据</strong>，不再单独列「差异点」——差异写在判断依据第二句里。</li>
+        <li><strong>检测结果</strong>用 badge 标类型：相同产品（红）、同款产品（橙）、疑似重复（黄）。</li>
+        <li>多种结果同时出现时按 相同 → 同款 → 疑似 排序，不按召回顺序。</li>
+        <li>数量多时按页展示，筛选与翻页都不收起已展开的判定规则。</li>
+      </ul>
+
+      <h4>4. 判断依据：一行一个维度，最多四行</h4>
+      <p>依据不写成一整段，按维度拆行，<strong>最多四行</strong>（在 skill 里限制）：</p>
+      <ul>
+        <li>第 1 行：<strong>标题主体</strong>——核心对象是什么、型号差在哪、哪些描述缺失但核心未变。</li>
+        <li>第 2 行：<strong>外形主体</strong>——读图看到的形态，机身、出风口、面板、轮组等。</li>
+        <li>第 3 行：<strong>供应商与采购价</strong>——两个编码是否相同、采购价整数部分是否一致。</li>
+        <li>第 4 行：<strong>尺寸 / 重量 / 材质 / 功能</strong>——存在哪些差异、差到什么程度。</li>
+      </ul>
+      <p>实际用几行由结论决定：<strong>相同产品</strong>通常前三行就够（后两行合成一句「符合相同产品判断依据」）；<strong>疑似重复</strong>只有前两行——这类本来就没比到采购价与关键规格。</p>
+      <p>每行单行展示、超出用省略号；鼠标悬浮弹出黑底白字浮层，一次给出全部行。省略号只是兜底，不是常态。</p>
+      <div class="shot">
+        <img src="img/18-reason-tooltip.png" alt="判断依据逐行展示，悬浮看全文">
+        <figcaption>判断依据一行一个维度：行内省略，悬浮出完整各行，不折行、不撑高行高</figcaption>
+      </div>
+
+      <h4>5. 判定规则：检测明细右侧下拉</h4>
+      <p>判断依据写的是「这一个比对对象为什么这么判」，读的人往往还要知道「凭什么规则这么判」。入口放在<strong>「检测明细」标题右侧</strong>的「判定规则 ▾」，点开在标题下方就地展开、再点收起——不开新弹窗、不叠一层浮层、不跳页。</p>
+      <div class="shot">
+        <img src="img/17-rule-inline.png" alt="检测明细右侧的判定规则下拉">
+        <figcaption>判定规则展开：浅灰底一块，三行分别对应三档结论，与下方明细同处一屏</figcaption>
+      </div>
+
+      <h3 id="detail-4">（四）检测失败：不开弹窗</h3>
+      <p>失败原因就是一句话，放悬浮即可；行内直接给「重新检测」。为一句原因多开一层弹窗，反而让「重试」多一步。</p>
+      <ul>
+        <li>列表显示「检测失败」+「重新检测」，不显示原因。</li>
+        <li>悬浮给「失败原因 · 检测时间」，与未发现重复同一种版式。</li>
+        <li>不输出检测明细，也不显示「未发现重复」——失败就是没结论，不能当成没重复。</li>
+      </ul>
+      <p>原因只分两种，不展示错误码：</p>
+      <div class="table-wrap">
+        <table class="wide">
+          <thead><tr><th>情况</th><th>悬浮里的一句话</th></tr></thead>
+          <tbody>
+            <tr><td>无产品信息</td><td>无法获取该商品的产品信息</td></tr>
+            <tr><td>查询失败</td><td>本次检测未能正常完成，未生成有效检测结论，可稍后重新检测</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li><strong>无产品信息</strong>：查不到目标产品，含调用层报错、超时、编码不存在、正式库没有这条数据。编码本身不存在与资料未同步表现一致，统一按这条处理。</li>
+        <li><strong>查询失败</strong>：产品信息查到了，但没拿到可信结果——两路召回都失败，或返回体解析不了、计数校验对不上、调用超时。具体是哪一种由研发记 <code>error_message</code> 区分，页面不再往下展开。</li>
+      </ul>
+    </section>
+
+    <!-- ============ 六 触发规则 ============ -->
+    <section class="panel" id="trigger">
+      <h2>六、触发规则</h2>
+      <p class="section-lead">只有项目内创建、且在检测范围的 SPU 自动检测；范围判断先于其他判断，不在范围的 SPU 不调用 Skill。不触发的情况分两种：<strong>规则上不该检</strong>，和<strong>流程上没触发</strong>。</p>
+
+      <h3 id="trigger-1">（一）首次自动触发</h3>
+      <ul>
+        <li><strong>触发场景</strong>：在项目里新建 SPU；存量补扫——2026-09-01 至上线日创建、已绑定项目、且无检测记录的 SPU。</li>
+        <li><strong>处理方式</strong>：系统直接传入 SPU，调用 Skill 判断；保存结果与判断时的产品信息快照。</li>
+        <li><strong>时机</strong>：事务提交之后异步发起，不在创建方法里直接调。</li>
+      </ul>
+
+      <h3 id="trigger-2">（二）关键信息变化重检</h3>
+      <p>已有检测记录的 SPU，只监听下面 5 类字段变化，命中即重检：</p>
+      <div class="table-wrap">
+        <table class="wide">
+          <thead><tr><th>触发条件</th><th>影响</th></tr></thead>
+          <tbody>
+            <tr><td>SKU 可售状态变化，变为不可售</td><td>代表 SKU 可能变化</td></tr>
+            <tr><td>SKU 生命周期状态变为 2 / 3 / 4 / 5</td><td>代表 SKU 可能变化</td></tr>
+            <tr><td>SPU 标题变化</td><td>影响标题召回和标题主体判断</td></tr>
+            <tr><td>SKU 主图变化</td><td>影响图片召回和外形判断</td></tr>
+            <tr><td>SPU 关联关系变化（加入 / 退出关系组）</td><td>影响候选 SPU 过滤范围</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li>SKU 生命周期共 6 个值：<code>0</code> 开发中 / <code>1</code> 常规 / <code>2</code> 清库存 / <code>3</code> 生命周期结束 / <code>4</code> 作废 / <code>5</code> 删除。其中只有 <code>0</code>、<code>1</code> 算在售，<strong>状态变为 2 / 3 / 4 / 5 即触发重检</strong>；0 与 1 之间互转不触发。</li>
+        <li>前两种会改变代表 SKU：重新判断，不沿用旧结果。</li>
+        <li><strong>其余字段第一阶段都不监听</strong>：供应商编码、采购价、尺寸、重量、材质、功能、普通 SKU 属性变化都不重跑，也不标记。</li>
+        <li><strong>换绑项目不触发调用</strong>：项目不是检测依据，换绑后既不重跑、也不标记，已有结论继续沿用。除新建 SPU 的首次检测外，只有上面 5 类字段变化才会发起调用。</li>
+        <li><strong>防抖</strong>：变更后延迟 10 分钟触发，期间再改则重置计时，只跑最后一次。</li>
+      </ul>
+
+      <h3 id="trigger-3">（三）手动触发</h3>
+      <ul>
+        <li>开发可通过「立即检测 / 重新检测」主动发起，每次结果都记录。</li>
+        <li>同 SPU 10 分钟内只允许发起 1 次。</li>
+        <li>命中排除范围的不给检测按钮。</li>
+      </ul>
+
+      <h3 id="trigger-4">（四）不触发的情况</h3>
+      <p>页面显示不同、按钮不同。</p>
+
+      <p><strong>A. 无需检测（规则上不该检）</strong></p>
+      <ul>
+        <li><strong>服装</strong>：品线第一段 = 服装，整条品线排除。项目内品线唯一，打开项目判一次即可。</li>
+        <li><strong>地毯</strong>：只看品类路径，共 11 条，按<strong>前缀匹配</strong>（路径下所有子类目一并排除），按 SPU 逐行判。地毯类目分散在 4 个一级类目下（家居、庭院、乐器、婴儿），所以按品类判，不按品线：
+          <ol class="cat-list">
+            <li>家居、厨具、家装 &gt; 厨房和餐厅 &gt; 餐厨布艺 &gt; 厨房地毯</li>
+            <li>家居、厨具、家装 &gt; 家居装饰 &gt; 地毯、地垫和保护剂 &gt; 地毯</li>
+            <li>家居、厨具、家装 &gt; 家居装饰 &gt; 地毯、地垫和保护剂 &gt; 地毯套装</li>
+            <li>家居、厨具、家装 &gt; 家居装饰 &gt; 地毯、地垫和保护剂 &gt; 长条地毯</li>
+            <li>家居、厨具、家装 &gt; 家居装饰 &gt; 地毯、地垫和保护剂 &gt; 地垫</li>
+            <li>家居、厨具、家装 &gt; 家居装饰 &gt; 地毯、地垫和保护剂 &gt; 无痕地毯贴和地垫</li>
+            <li>家居、厨具、家装 &gt; 家居装饰 &gt; 儿童房间装饰品 &gt; 地毯</li>
+            <li>家居、厨具、家装 &gt; 节日聚会用品 &gt; 装饰品 &gt; 过道地毯</li>
+            <li>庭院、草坪和园艺 &gt; 户外饰品 &gt; 户外地毯</li>
+            <li>乐器、乐器配件 &gt; 打击乐器配件 &gt; 地毯</li>
+            <li>婴儿用品 &gt; 托儿所 &gt; 家居装饰 &gt; 地毯</li>
+          </ol>
+        </li>
+        <li><strong>路径只能完整匹配，不能用关键词</strong>：类目名里带「地毯」但不该排除的还有 12 条——地毯清洁剂（汽车 / 家用 / 工业各 1 条）、地毯除臭剂（2 条）、地毯清洁与除臭剂、地毯清洁机及配件（2 条）、商用地板地毯清洁用品、地毯保护剂、冲针和地毯冲（2 条）。按关键词筛会全部误伤。</li>
+        <li><strong>虚拟产品 / 成套组合 / 物料产品</strong>：<code>product_type = 3</code> 且 <code>is_bundle = 0</code> 判虚拟产品，<code>is_bundle = 1</code> 判成套组合，产品类型为物料判物料产品。这三类分别是运营组合销售、整套售卖、不对外售卖，都不是开发按单款开的品，不参与检测。</li>
+        <li><strong>其余都不排除</strong>：一件多箱按普通产品检测；配件标记在 SKU 维度、SPU 上拿不到，且配件一般不在项目里做，不单独排除。</li>
+        <li>页面显示「无需检测」，<strong>不提供检测按钮、没有弹窗</strong>，只在标签上悬浮提示命中的规则。</li>
+        <li><strong>默认要检测</strong>：只有命中上面几类才判无需检测。品类路径为空、品线字段缺失、<code>product_type</code> 取不到值，都按「要检测」处理。</li>
+        <li>排除清单只有一份，存系统配置表，带生效时间和版本号。判定在系统侧、提交任务前完成，命中就不调 Skill，也不写检测记录——「无需检测」是查询时按规则算出来的，<strong>不落库</strong>。</li>
+      </ul>
+
+      <p><strong>B. 未检测（流程上没触发）</strong></p>
+      <ul>
+        <li><strong>非项目入口创建</strong>：无项目 SPU 列表承载，不自动触发。</li>
+        <li><strong>后绑进项目 / 换绑项目</strong>：项目不是检测依据，绑定与换绑都不触发调用，已有结论继续沿用。</li>
+        <li><strong>9 月前创建的历史存量</strong>：不在本次补扫范围。</li>
+        <li>页面显示「未检测」，<strong>提供「立即检测」</strong>；同样不落库，没有检测记录即为未检测。</li>
+      </ul>
+
+      <div class="note">
+        <strong>两者不能混。</strong>无需检测是「规则说不该检」，未检测是「该检但还没检」。前者不给按钮、不设弹窗；后者给按钮。两者都不落库，都在查询时按「有无检测记录 + 是否命中规则」算出来。
+      </div>
+
+    </section>
+
+    <!-- ============ 七 权限 ============ -->
+    <section class="panel" id="perm">
+      <h2>七、权限</h2>
+      <p>不单独设检测权限：<strong>能进入项目详情页的角色，都能看结论、都能点检测、都能跳转 SKU 详情</strong>。开发和运营都有查重复的需求，靠页面权限控制即可，不再细分。</p>
+    </section>
+
+    <!-- ============ 八 数据字段 ============ -->
+    <section class="panel" id="fields">
+      <h2>八、数据字段（建议）</h2>
+      <p class="section-lead">本节表结构与字段为<strong>建议稿</strong>，供研发参考，最终以研发设计为准。页面可以不展示，但建议都落库，否则统计、补扫、追溯都做不了。</p>
+
+      <h3 id="fields-1">（一）检测任务表</h3>
+      <p>每个 SPU 一条当前结果，覆盖更新；每次重检另写一条历史摘要。</p>
+      <div class="table-wrap">
+        <table class="wide">
+          <thead><tr><th>字段</th><th>用途</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><code>spu_code</code></td><td>主键</td><td>结果跟着 SPU 走，不跟项目走</td></tr>
+            <tr><td><code>project_id</code></td><td>关联</td><td><strong>可空</strong>，项目页只是 join 视图</td></tr>
+            <tr><td><code>task_status</code></td><td>检测状态</td><td>落库字段，页面「页面检测状态」取的就是它：检测中 / 检测成功 / 检测失败（未检测、无需检测不落库，查询时现算）</td></tr>
+            <tr><td><code>target_sku</code> / <code>target_title</code> / <code>target_category</code> / <code>target_image</code></td><td>目标快照</td><td>检测当时的代表 SKU 与资料；弹窗「目标产品」段直接读这里，不回查产品表</td></tr>
+            <tr><td><code>trigger_source</code></td><td>创建来源</td><td>创建时写死，绑项目不改</td></tr>
+            <tr><td><code>trigger_type</code></td><td>本次触发方式</td><td>自动首次 / 自动重检 / 手动首次 / 手动重检 / 存量补扫（与变更记录表同一套枚举）</td></tr>
+            <tr><td><code>same_count</code> / <code>style_count</code> / <code>suspected_count</code></td><td>三类计数</td><td>相同 / 同款 / 疑似。检测成功时 ≥ 0；检测中、检测失败时为 <strong>NULL</strong></td></tr>
+            <tr><td><code>is_duplicate</code></td><td>快捷标记</td><td>有无重复，供筛选与统计；不参与列表显示</td></tr>
+            <tr><td><code>candidate_count</code></td><td>可信度</td><td>参与判断的候选数</td></tr>
+            <tr><td><code>non_duplicate_count</code> / <code>non_duplicate_spus</code></td><td>比对范围</td><td>回答「有没有跟 X 比过」</td></tr>
+            <tr><td><code>error_message</code></td><td>失败排查</td><td>只入库，页面不展示原值</td></tr>
+            <tr><td><code>detected_at</code></td><td>时效</td><td>判断这个结论还能不能信</td></tr>
+            <tr><td><code>skill_version</code> / <code>rule_version</code></td><td>追溯</td><td>出问题时能圈出「哪个版本跑的」</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="fine">表里只存<strong>真正跑过的检测</strong>：没有记录就是「未检测」，命中排除规则就是「无需检测」，两者都不建记录。结论词也不单独建字段，由三类计数现算，避免和计数打架。</p>
+
+      <h4>落库示例</h4>
+      <p>同一张表，六种页面状态由「有没有记录 + 记录内容」推导出来，表里不存页面状态词：</p>
+      <div class="table-wrap">
+        <table class="wide">
+          <thead><tr><th>spu_code</th><th>task_status</th><th>same</th><th>style</th><th>suspected</th><th>is_duplicate</th><th>error_message</th><th>页面显示</th></tr></thead>
+          <tbody>
+            <tr><td>PHO_0ZO8</td><td>检测成功</td><td>2</td><td>2</td><td>2</td><td>是</td><td>空</td><td>相同 2 · 同款 2 · 疑似 2 +「详情」</td></tr>
+            <tr><td>PHO_1A2B</td><td>检测成功</td><td>0</td><td>1</td><td>1</td><td>是</td><td>空</td><td>同款 1 · 疑似 1 +「详情」</td></tr>
+            <tr><td>PHO_3C4D</td><td>检测成功</td><td>0</td><td>0</td><td>1</td><td>疑似</td><td>空</td><td>疑似 1 +「详情」</td></tr>
+            <tr><td>PHO_5E6F</td><td>检测成功</td><td>0</td><td>0</td><td>0</td><td>否</td><td>空</td><td>未发现重复 +「重新检测」</td></tr>
+            <tr><td>PHO_7G8H</td><td>检测中</td><td>NULL</td><td>NULL</td><td>NULL</td><td>空</td><td>空</td><td>◌ 检测中</td></tr>
+            <tr><td>PHO_9I0J</td><td>检测失败</td><td>NULL</td><td>NULL</td><td>NULL</td><td>空</td><td>无产品信息</td><td>检测失败 +「重新检测」</td></tr>
+            <tr><td>PHO_A1B2</td><td colspan="6">无记录（未插入）</td><td>命中排除规则 → 横杠；未命中 → 未检测 +「立即检测」</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>页面状态按下表推导，全部在查询时算，不存字段：</p>
+      <div class="table-wrap">
+        <table class="wide">
+          <thead><tr><th>记录情况</th><th>页面状态</th></tr></thead>
+          <tbody>
+            <tr><td>无记录，且命中排除规则</td><td>无需检测（横杠，不提供按钮）</td></tr>
+            <tr><td>无记录，且未命中排除规则</td><td>未检测（给「立即检测」）</td></tr>
+            <tr><td>有记录，<code>task_status = 检测中</code></td><td>检测中</td></tr>
+            <tr><td>有记录，<code>task_status = 检测失败</code></td><td>检测失败（原因取 <code>error_message</code>）</td></tr>
+            <tr><td>有记录，<code>task_status = 检测成功</code>，三类计数全为 0</td><td>未发现重复</td></tr>
+            <tr><td>有记录，<code>task_status = 检测成功</code>，三类计数至少一个 &gt; 0</td><td>直接写构成，按 相同 → 同款 → 疑似 排，为 0 的不显示</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note red">
+        <strong>三个必须守住的写法：</strong>① 检测中、检测失败的计数一律写 <code>NULL</code>，<strong>不能写 0</strong>——写 0 就和「未发现重复」（0/0/0）分不开了；② <code>is_duplicate</code> 在检测中、失败时留空字符串，<strong>不能写「否」</strong>——「否」的含义是「比过了、没重复」，失败是「没比成」；③ 未检测、无需检测<strong>不建记录</strong>，不要用 <code>task_status = '未检测'</code> 占位，否则「有没有记录」这个判据就失效了。
+      </div>
+
+      <h3 id="fields-2">（二）检测明细表</h3>
+      <p><code>duplicate_items</code> 拆行入库，一行一个比对对象，只留最近 3 次。</p>
+      <div class="table-wrap">
+        <table class="wide">
+          <thead><tr><th>字段</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><code>task_id</code> / <code>spu_code</code></td><td>关联检测任务</td></tr>
+            <tr><td><code>duplicate_type</code></td><td>相同产品 / 同款产品 / 疑似重复</td></tr>
+            <tr><td><code>similar_spu</code> / <code>similar_sku</code></td><td>比对对象 SPU 与代表 SKU</td></tr>
+            <tr><td><code>similar_title</code> / <code>similar_image</code></td><td>比对对象标题与主图快照</td></tr>
+            <tr><td><code>recall_source</code></td><td>标题 / 图片 / 标题+图片</td></tr>
+            <tr><td><code>title_judgement</code> / <code>image_judgement</code></td><td>两个主体的判断结论</td></tr>
+            <tr><td><code>image_summary</code> / <code>image_analysis_source</code></td><td>读图依据与读图方式</td></tr>
+            <tr><td><code>reason</code> / <code>reason_brief</code></td><td>弹窗检测明细展示 <code>reason</code> 全文；<code>reason_brief</code> 只用于列表悬浮等窄位置</td></tr>
+            <tr><td><code>difference</code></td><td>同款的主要差异</td></tr>
+            <tr><td><code>suggestion</code></td><td>建议删除 / 人工确认 / 人工复核</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note teal">
+        <strong>反向关联靠这张表就够了。</strong>A 三月创建时「未发现重复」，六月 B 创建检出「和 A 相同」——此时 B 知道自己重复了，A 的页面还是绿的。用 <code>similar_spu = A</code> 反查检测明细表，就能在 A 的弹窗里补一行「已被 B 检出为相同品」，两个时间都带上。不需要单独建表。
+      </div>
+
+      <h3 id="fields-3">（三）变更记录表</h3>
+      <p>每次触发、每次状态变化写一条，只增不改，用于回溯「为什么这次重跑了」。</p>
+      <div class="table-wrap">
+        <table class="wide">
+          <thead><tr><th>字段</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><code>spu_code</code></td><td>被检测的 SPU</td></tr>
+            <tr><td><code>task_id</code></td><td>对应的检测任务</td></tr>
+            <tr><td><code>trigger_type</code></td><td>自动首次 / 自动重检 / 手动首次 / 手动重检 / 存量补扫</td></tr>
+            <tr><td><code>trigger_reason</code></td><td>触发原因，如「标题变更」「主图变更」「用户点击」</td></tr>
+            <tr><td><code>from_status</code> / <code>to_status</code></td><td>状态变化前后</td></tr>
+            <tr><td><code>operator</code></td><td>手动触发时记操作人，自动触发记 system</td></tr>
+            <tr><td><code>created_at</code></td><td>发生时间</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 id="fields-4">（四）系统侧校验</h3>
+      <ul>
+        <li>三类计数按 <code>duplicate_items</code> 的 <code>duplicate_type</code> 现数；<code>candidate_count</code> = 相同 + 同款 + 疑似 + 非重复。返回的计数与明细不一致时以明细为准，记备注，<strong>不判失败</strong>。</li>
+        <li><code>non_duplicate_count</code> = <code>non_duplicate_spus</code> 数组长度，同样以数组为准。</li>
+        <li>判断依据按维度拆行、最多四行。逐行检查：出现「供应商」「采购价」「尺寸」「重量」「材质」「功能」等词的维度，必须带对应的数值或具体描述；只有结论、没有事实的，标记该条结果可疑，页面加提示。</li>
+        <li>JSON 解析失败、字段缺失、状态值不在枚举内，一律判「检测失败」，不猜。</li>
+      </ul>
+    </section>
+
+    <!-- ============ 九 后续 ============ -->
+    <section class="panel" id="next">
+      <h2>九、后续规划</h2>
+
+      <h3 id="next-1">（一）近期</h3>
+      <p>在一期之后紧接推进，重点是扩召回来源、把调用方式固化下来。</p>
+      <ul>
+        <li><strong>新增「竞品相同」召回入口</strong>：在标题、图片两路之外，接入竞品相同召回，返回竞品库中与本产品相同的 SKU，作为第三类候选来源；<code>recall_source</code> 增加取值「竞品」。</li>
+        <li><strong>竞品信息一致性判断</strong>：对召回的竞品 SKU 逐项比对本产品信息是否一致（标题、品类、关键规格、采购价），输出一致 / 不一致 / 无法比较，口径与现有候选判定保持一致，结果并入同一套三档结论。</li>
+        <li><strong>封装 MCP</strong>：把竞品相同召回封装成 MCP 工具，由 Skill 直接调用，不再依赖人工在对话里单独查。</li>
+        <li><strong>测试</strong>：补召回准确率与漏召抽样测试，确认竞品来源可用、结果稳定后再接入自动检测。</li>
+      </ul>
+
+      <h3 id="next-2">（二）暂不做</h3>
+      <ul>
+        <li><strong>评分卡点</strong>：检测结果暂不参与产品评分，也不作为评分扣分项。</li>
+        <li><strong>系统流程卡点</strong>：不阻塞 SPU 创建与项目审核，结论只做提示。</li>
+        <li>两类卡点待检出准确率稳定、误报可控后再评估，不在本期排期。</li>
+      </ul>
+
+      <h3 id="next-3">（三）上线后关注指标</h3>
+      <p>按四层看：业务效果证明有没有用，判断质量决定能不能进流程，链路健康决定能不能用，使用情况解释前两层为什么变。</p>
+      <div class="table-wrap">
+        <table class="wide">
+          <thead><tr><th>层级</th><th>指标</th><th>看什么</th><th>异常意味着</th></tr></thead>
+          <tbody>
+            <tr><td rowspan="3">业务效果</td><td>新建 SPU 重复率环比</td><td>上线后新建 vs 上线前新建，同品类对比</td><td>没降 = 功能没影响开品行为，只是多了个提示</td></tr>
+            <tr><td>处理动作率</td><td>检出重复后实际合并 / 删除的 ÷ 检出的</td><td>低到个位数 = 结论没落地，需要加强提示或推进卡点</td></tr>
+            <tr><td>重复率 × 品类</td><td>按品类路径拆重复率，看集中在哪几类</td><td>定位管控重点与推广范围</td></tr>
+            <tr><td rowspan="4">判断质量</td><td>推翻率</td><td>开发反馈「不是重复」的 ÷ 已反馈的</td><td>高 = 误报，暂不能进评分与流程卡点</td></tr>
+            <tr><td>漏召抽样率</td><td>每周人工抽 30～50 条「未发现重复」复核</td><td>抽出的真重复多 = 漏报，功能失去意义</td></tr>
+            <tr><td>疑似占比</td><td>疑似 ÷ 有结论的</td><td>超过三成 = 判定能力不足，把决策全推给人</td></tr>
+            <tr><td>空结果构成</td><td>零候选 / 全过滤 / 真无重复 各占比</td><td>零候选多 = 召回过严；全过滤多 = 过滤规则太狠</td></tr>
+            <tr><td rowspan="3">链路健康</td><td>检测成功率</td><td>检测成功 ÷ 总任务</td><td>链路不稳，先查失败原因分布</td></tr>
+            <tr><td>检测耗时 P90</td><td>从发起到出结果</td><td>超过 60 秒基本没人愿意等</td></tr>
+            <tr><td>自动触发率</td><td>实际自动检测 ÷ 应自动检测</td><td>低于预期 = 漏触发，查异步任务</td></tr>
+            <tr><td rowspan="2">使用情况</td><td>手动重检率</td><td>手动 ÷ 自动</td><td>高 = 开发不信结论，或变更后结论明显过期</td></tr>
+            <tr><td>覆盖率</td><td>已检测 ÷（应检测 − 无需检测）</td><td>分母不能用全库，否则永远个位数</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note teal">
+        <strong>成功率不等于准确率。</strong>检测成功率只说明接口通了，跟判得准不准无关，两个必须分开看。准确率没有标准答案可对，只能靠抽样：每周抽 30～50 条复核，半小时的成本，比任何看板都直接。
+      </div>
+
+      <h4>重复率怎么算</h4>
+      <p>公式：<strong>有重复结论的 SPU 数 ÷ 检测成功的 SPU 数</strong>。五个口径必须定死，否则算出来的数不可比：</p>
+      <div class="table-wrap">
+        <table class="wide">
+          <thead><tr><th>项</th><th>口径</th><th>不定死会怎样</th></tr></thead>
+          <tbody>
+            <tr><td>计数单位</td><td>按 SPU 去重，一个 SPU 算一次</td><td>按明细条数算，一个 SPU 挂 5 个候选就放大 5 倍</td></tr>
+            <tr><td>分子</td><td>相同 &gt; 0 或 同款 &gt; 0，即 <code>is_duplicate = 是</code></td><td>把疑似算进去，重复率虚高</td></tr>
+            <tr><td>分母</td><td>只算「检测成功」</td><td>掺进未检测、无需检测、失败，分母稀释、重复率偏低</td></tr>
+            <tr><td>时间归属</td><td>按 <strong>SPU 创建时间</strong>分组，不按检测时间</td><td>3 月老品 11 月重检会算进 11 月，环比全乱</td></tr>
+            <tr><td>多次检测</td><td>取当前最新结论</td><td>用历史表算必须取最新一条，否则重复计数</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>相同与同款分开看，因为处理动作不同：相同品重复率 = 相同 &gt; 0 的 SPU ÷ 检测成功 SPU；同款重复率 = 相同 = 0 且同款 &gt; 0 的 SPU ÷ 检测成功 SPU，两者相加即总重复率。同款必须排除已算过相同的 SPU，否则同时命中两类的品会被算两次。</p>
+      <div class="note">
+        <strong>环比基线只能来自存量补扫。</strong>上线前的新建 SPU 从没检测过，没有重复率可算，直接「上线后 vs 上线前」比不出来。基线期取 2026-09-01 至上线日创建、由存量补扫算出重复率的 SPU；观察期取上线后创建的 SPU；两者按同品类、同长度窗口对比。例：观察期 1000 个检测成功、180 个有重复 = 18.0%，基线期 900 个检测成功、200 个有重复 = 22.2%，降 4.2 个百分点才算有效。
+      </div>
+      <p class="fine">推翻率需要开发回填真实处理结果才能算，一期先不做统计，待反馈机制跑起来后再补。观察节奏：2 周看成功率与耗时；1 个月看重复率、品类分布、疑似占比与空结果构成，再决定推广范围。</p>
+
+      <h3 id="next-4">（四）一期预留</h3>
+      <p>「结果反馈」三选一（确认重复 / 不是重复 / 不确定）。一期只展示不卡点，如果连反馈都没有，上线后就没有任何标准答案，只能统计调用量，回答不了「准不准」。</p>
+    </section>
+
+    <p class="foot">重复品检测 · 产品方案 V1.0 · 2026-11-13</p>
+  </main>
+</div>
+</body>
+</html>

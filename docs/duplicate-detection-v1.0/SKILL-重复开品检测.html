@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>重复开品检测 Skill 全文</title>
+<style>
+:root{--bg:#f3f5f9;--paper:#fff;--ink:#182b45;--body:#263953;--muted:#62738b;--line:#dbe3ed;--head:#f1f5fa;--teal:#087f83;--teal-soft:#e8f6f5;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--body);font:14px/1.8 "Microsoft YaHei","PingFang SC",sans-serif}
+.wrap{max-width:980px;margin:26px auto;padding:0 20px 60px}
+.top{margin-bottom:16px;padding:20px 26px;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 28px rgba(27,53,86,.05)}
+.top h1{margin:0 0 6px;font-size:22px;color:var(--ink)}
+.top p{margin:0;color:var(--muted);font-size:13px}
+.top a{color:var(--teal)}
+.paper{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:26px 30px;box-shadow:0 10px 28px rgba(27,53,86,.045)}
+h1,h2,h3,h4{color:var(--ink);line-height:1.5}
+h1{font-size:24px;margin:6px 0 14px}
+h2{font-size:19px;margin:26px 0 10px;padding-top:14px;border-top:1px solid var(--line)}
+h3{font-size:16px;margin:20px 0 8px}
+h4{font-size:14px;margin:16px 0 6px}
+p{margin:8px 0}
+ul,ol{margin:8px 0;padding-left:1.6em}
+li{margin:3px 0}
+strong{color:var(--ink)}
+code{background:#eef3f8;color:#1f4a6b;padding:1px 5px;border-radius:4px;font-family:Consolas,Monaco,monospace;font-size:12px}
+pre{background:#0f1c2e;color:#dbe7f3;padding:14px 16px;border-radius:9px;overflow-x:auto;font-size:12.5px;line-height:1.7}
+pre code{background:none;color:inherit;padding:0}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:9px;margin:12px 0}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{background:var(--head);color:#38516e;padding:8px 10px;text-align:left;white-space:nowrap}
+td{padding:8px 10px;border-top:1px solid var(--line);vertical-align:top}
+tr:nth-child(even) td{background:#fcfdff}
+hr{border:0;border-top:1px dashed var(--line);margin:22px 0}
+a{color:var(--teal)}
+</style></head><body><div class="wrap">
+<div class="top"><h1>重复开品检测 Skill · 全文</h1>
+<p>源文件：<code>更改正式服main的skill/skill1_重复开品检测/SKILL.md</code> · 本页为渲染版，便于在方案中直接查看</p></div>
+<div class="paper">
+<h1>产品重复开品检测器</h1>
+<h2>技能描述</h2>
+<p>本技能用于检测产品是否存在重复开品。支持输入 SKU、SPU、产品标题或产品图片，先通过相似标题/相似图片接口召回候选池，再基于候选代表 SKU 的销售信息进行重复判断。</p>
+<h2>触发场景</h2>
+<p>当用户要求查重、检测重复开品、检查产品是否已存在，或提供标题/图片/SKU/SPU 要求查找相似产品时，应调用本技能。</p>
+<h2>输入方式</h2>
+<pre><code>SKU编码：PHK_3AP48K3C
+SPU编码：PHK_3AP4
+产品标题：儿童学习椅
+产品图片：https://xxx.com/image.jpg
+SKU列表：xxx, xxx
+SPU列表：xxx, xxx</code></pre>
+<p>支持单个或多个目标，多个目标以列表形式输入。</p>
+<p>目标数量超过 10 个时，先提示“本次共 N 个目标，检测耗时较长，建议分批进行以获得更完整的结果”，提示后仍按用户要求继续执行，不得拒绝或强制拆分。目标数量为 10 个及以下时，不输出该提示。</p>
+<p>单个目标查询失败或状态异常，不影响其余目标继续执行。</p>
+<h2>可用工具</h2>
+<div class="tw"><table><thead><tr><th>MCP</th><th>工具</th><th>用途</th></tr></thead><tbody><tr><td>sku_data</td><td><code>get_developer_sales_info</code></td><td>获取 SKU/SPU 销售信息</td></tr><tr><td>similar_product</td><td><code>similar_title_search</code></td><td>按标题召回相似候选</td></tr><tr><td>similar_product</td><td><code>similar_image_search</code></td><td>按图片召回相似候选</td></tr><tr><td>当前模型</td><td>视觉能力（内置，优先）</td><td>直接读取图片URL，分析产品外观、材质、款式、用途及使用场景</td></tr><tr><td>multimodal_understanding</td><td><code>multimodal_understanding</code>（次选）</td><td>模型视觉无法获得有效结果时，分析目标图与候选图</td></tr></tbody></table></div>
+<p>视觉能力为首选、multimodal_understanding 为次选，两者都需实际读取图片内容才能用于判断；工具不可用或无有效结果时，按步骤6.3 将外形主体记为“无法确认”，不得仅凭图片相似接口的命中或相似分数判断。</p>
+<h2>多目标处理规则</h2>
+<p>输入为多个目标时，按以下规则处理：</p>
+<ul>
+<li>按输入顺序逐个目标独立执行步骤1~步骤6；</li>
+<li>排除集合按各自目标分别计算：查目标 A 时使用 A 的 <code>spu_code</code> 与 A 的 <code>spu_relation_group</code>，查目标 B 时使用 B 的，不合并；</li>
+<li>目标之间不互相排除：查目标 A 时，本次输入的其他目标仍可作为候选参与判断，用于发现本批产品之间的重复；</li>
+<li>结果按输入顺序输出；单个目标的失败或异常在汇总中标注，不中断其他目标。</li>
+</ul>
+<h2>执行步骤</h2>
+<h2>步骤1：获取目标产品信息</h2>
+<p>输入为 SKU/SPU 时，先获取目标销售信息。</p>
+<h3>1.1 输入识别规则</h3>
+<ol>
+<li>明确输入 SKU：调用 <code>get_developer_sales_info(sku_code)</code> 获取该 SKU 的销售信息，并直接将该 SKU 作为目标代表 SKU。</li>
+<li>明确输入 SPU：调用 <code>get_developer_sales_info(spu_code)</code> 获取该 SPU 下 SKU 列表，并从返回 SKU 中选择目标代表 SKU。</li>
+<li>未标明 SKU/SPU 的编码，按以下顺序执行，不得跳过任何一步、不得提前终止：</li>
+<ul>
+<li>第一步：按 <code>spu_code</code> 查询；</li>
+<li>第二步：第一步无返回时，必须再按 <code>sku_code</code> 查询同一编码；</li>
+<li>第三步：两次均无返回，才可判定“无产品信息”。</li>
+<li>禁止：第一次查询为空即终止，或未执行第二步就判定编码不存在。</li>
+<li>长度仅作辅助参考，不可作为唯一判据：8 位（如 <code>PHK_337D</code>）优先按 SPU 查询；14 位及以上优先按 SKU 查询；11/12/13 位长度存在歧义，两种都必须查询。</li>
+</ul>
+<li>输入标题或图片：不获取目标销售信息，直接进入相似搜索。仅输入标题或仅输入图片时，结果最多为“疑似重复”；同时输入标题和图片时，若标题主体一致且外形主体一致，结果最多可判定为“同款产品”，但因缺少系统SKU/SPU信息，不判定为“相同产品”。</li>
+</ol>
+<h3>1.2 目标代表 SKU 规则</h3>
+<ul>
+<li>若输入为 SKU：直接使用输入 SKU 作为目标代表 SKU，不再根据所属 SPU 重新选择 SKU。</li>
+<li>若输入为 SPU：按以下规则选择目标代表 SKU：</li>
+<ul>
+<li>优先选择 <code>sales_info.is_independent_saleable = 1</code> 的 SKU；</li>
+<li>如果均不可独立售卖，选择第一个 SKU。</li>
+</ul>
+<li>后续标题搜索、图片搜索和重复判断，均基于目标代表 SKU。</li>
+<li>无论输入为 SKU 还是 SPU，完成本步骤后必须记录目标SPU编码（即步骤1 返回的 <code>spu_code</code>，也就是用户输入的那个产品自身的 SPU），供步骤3 排除自身使用。</li>
+</ul>
+<h3>1.3 判断字段</h3>
+<p>目标/候选判断字段统一取自 <code>get_developer_sales_info</code>：</p>
+<div class="tw"><table><thead><tr><th>判断字段</th><th>实际字段</th></tr></thead><tbody><tr><td>SKU编码</td><td><code>sku_code</code></td></tr><tr><td>SPU编码</td><td><code>spu_code</code></td></tr><tr><td>品类</td><td><code>category_name_path</code></td></tr><tr><td>品线</td><td><code>product_line_name</code></td></tr><tr><td>产品标题</td><td><code>sku_cn_title</code></td></tr><tr><td>产品图片</td><td><code>main_image_url</code></td></tr><tr><td>尺寸</td><td><code>length / width / height</code></td></tr><tr><td>重量</td><td><code>weight</code></td></tr><tr><td>材质</td><td><code>material</code></td></tr><tr><td>变体属性</td><td><code>sku_attributes</code></td></tr><tr><td>功能</td><td><code>sales_info.sell_points.功能</code></td></tr><tr><td>采购价</td><td><code>purchase_price</code></td></tr><tr><td>供应商编码</td><td><code>supplier_code</code></td></tr><tr><td>是否可独立售卖</td><td><code>sales_info.is_independent_saleable</code></td></tr></tbody></table></div>
+<p>目标产品还需读取以下附加字段，用于候选过滤：</p>
+<div class="tw"><table><thead><tr><th>字段</th><th>实际字段</th><th>用途</th></tr></thead><tbody><tr><td>SPU关联组</td><td><code>spu_relation_group</code></td><td>用于过滤目标SPU及其关联SPU，具体规则见步骤3</td></tr></tbody></table></div>
+<p>SPU关联组返回规则：</p>
+<ul>
+<li>仅当目标SPU存在关联组时返回 <code>spu_relation_group</code>；</li>
+<li>返回列表包含目标SPU本身；</li>
+<li>未返回该字段时，表示目标SPU不存在关联组。</li>
+</ul>
+<h2>步骤2：召回相似候选</h2>
+<p>基于步骤1获取到的目标代表 SKU 信息调用相似接口。</p>
+<h3>2.1 调用工具</h3>
+<div class="tw"><table><thead><tr><th>目标代表 SKU 信息</th><th>工具</th><th>参数</th></tr></thead><tbody><tr><td><code>sku_cn_title</code> 非空</td><td><code>similar_title_search</code></td><td><code>searchWord = sku_cn_title</code></td></tr><tr><td><code>main_image_url</code> 非空</td><td><code>similar_image_search</code></td><td><code>url = main_image_url</code></td></tr></tbody></table></div>
+<h3>2.2 调用规则</h3>
+<ol>
+<li>输入为 SKU/SPU 时，必须先按步骤1获取目标代表 SKU。</li>
+<li>输入为 SKU 时，直接使用该 SKU 的 <code>sku_cn_title</code> 和 <code>main_image_url</code> 进行召回，不得重新选择目标 SKU。</li>
+<li>只要目标代表 SKU 有 <code>sku_cn_title</code>，就必须调用 <code>similar_title_search</code>。</li>
+<li>只要目标代表 SKU 有 <code>main_image_url</code>，就必须调用 <code>similar_image_search</code>。</li>
+<li>如果 <code>sku_cn_title</code> 和 <code>main_image_url</code> 都有，两个接口都必须调用。</li>
+<li>只有在用户仅输入标题且无法获取目标 SKU 信息时，才只调用标题搜索。</li>
+<li>只有在用户仅输入图片且无法获取目标 SKU 信息时，才只调用图片搜索。</li>
+<li>相似接口只用于召回候选，不直接作为重复判断依据。</li>
+</ol>
+<h3>2.3 标题相似搜索规则</h3>
+<p>当目标代表 SKU 的 <code>sku_cn_title</code> 非空时，标题相似搜索按以下规则执行：</p>
+<ol>
+<li>第一次搜索：使用完整 <code>sku_cn_title</code> 调用 <code>similar_title_search</code>。</li>
+<li>若完整标题搜索无返回，或按步骤3过滤、步骤4筛选后无有效候选，才允许进行第二次搜索。</li>
+<li>第二次搜索：使用标题主体词调用 <code>similar_title_search</code>。</li>
+<li>标题搜索最多执行两次，不得自行拆分多个关键词反复搜索。</li>
+<li>标题搜索命中只表示候选召回，不等于最终重复判断。</li>
+</ol>
+<h3>2.4 标题主体词提取规则</h3>
+<p>标题主体词优先基于结构化字段从 <code>sku_cn_title</code> 中扣减生成，不完全依赖模型自由理解。</p>
+<p>生成规则：</p>
+<ol>
+<li>以完整 <code>sku_cn_title</code> 作为原始标题。</li>
+<li>从标题中去除 <code>material</code> 字段值。</li>
+<li>从标题中去除 <code>sku_attributes</code> 中的变体属性值。</li>
+<li>若 <code>sku_attributes</code> 中的值为英文，需结合常见中英文属性映射识别标题中的中文表达，例如：</li>
+<ul>
+<li>Black = 黑色</li>
+<li>Gray / Grey = 灰色</li>
+</ul>
+<li>去除后保留核心产品对象、必要结构词、关键款式词、关键功能词。</li>
+<li>不得只保留过宽泛的通用词。</li>
+<li>不得将标题拆成多个词分别搜索。</li>
+<li>若结构化字段不足，才按通用规则辅助去除颜色、尺寸、数量、包装方式、重量、型号、适配范围、套装数量、促销词等变体或规格信息。</li>
+</ol>
+<p>示例：</p>
+<p>目标信息：</p>
+<pre><code>{
+  &quot;sku_cn_title&quot;: &quot;庭院红外线天花板取暖器-P05-GR15B碳纤维加热管 1500W  英规GARVEE 黑色 铝合金&quot;,
+  &quot;material&quot;: &quot;铝合金&quot;,
+  &quot;sku_attributes&quot;: {
+    &quot;color&quot;: &quot;Black&quot;
+  }
+}</code></pre>
+<p>处理方式：</p>
+<ul>
+<li>去除材质：<code>铝合金</code></li>
+<li>去除变体属性：<code>Black</code> 对应标题中的 <code>黑色</code></li>
+</ul>
+<p>标题主体词可提取为：</p>
+<pre><code>庭院红外线天花板取暖器-P05-GR15B碳纤维加热管 1500W 英规GARVEE</code></pre>
+<p>若品牌词会明显影响召回，也可进一步去除品牌词，得到：</p>
+<pre><code>庭院红外线天花板取暖器-P05-GR15B碳纤维加热管 1500W 英规</code></pre>
+<p>标题主体词仅用于完整标题搜索无返回，或按步骤3过滤、步骤4筛选后无有效候选时的兜底召回，不替代完整标题搜索。</p>
+<h3>2.5 图片相似搜索规则</h3>
+<ol>
+<li>当目标代表 SKU 的 <code>main_image_url</code> 非空时，必须调用 <code>similar_image_search</code>。</li>
+<li>图片搜索命中只表示候选被召回，不直接等于外形一致。</li>
+<li>不得仅根据图片 URL 不同判断外形不同。</li>
+<li>是否外形一致，需在步骤6实际读取并比较目标图、候选图；图片搜索命中本身不能代替视觉判断。</li>
+</ol>
+<h3>2.6 候选合并规则</h3>
+<ol>
+<li>合并标题搜索和图片搜索返回的 <code>data</code>。</li>
+<li>相同 <code>spu</code> 只保留一组。</li>
+<li>同一候选 SPU 同时被标题和图片召回时，仅保留一组候选，并记录召回来源为“标题+图片”。</li>
+<li>仅被标题召回的候选，召回来源记为“标题”。</li>
+<li>仅被图片召回的候选，召回来源记为“图片”。</li>
+<li>合并后的候选进入步骤3处理。</li>
+</ol>
+<h2>步骤3：过滤目标SPU及关联SPU</h2>
+<p>在进入候选销售信息查询和重复判断前，对候选SPU进行过滤。</p>
+<ol>
+<li>排除SPU集合由以下内容组成：</li>
+<ul>
+<li>目标SPU：<strong>用户输入的那个产品自身的 SPU</strong>，即步骤1 <code>get_developer_sales_info</code> 返回的 <code>spu_code</code> 字段值。输入 SPU 时该值即输入的 SPU 编码；输入 SKU 时该值为该 SKU 所属的 SPU 编码（如 SKU <code>PHK_337DHYKY</code> 的 <code>spu_code</code> 为 <code>PHK_337D</code>）。该值在本次检测中唯一固定；<strong>候选产品的 <code>spu_code</code>、输入的原始编码本身、标题均不得作为目标SPU</strong>；</li>
+<li>目标销售信息返回的 <code>spu_relation_group</code>（如有）。</li>
+</ul>
+<li>对排除SPU集合按SPU去重。</li>
+<li>若召回候选中的 <code>spu</code> 命中排除SPU集合，则直接过滤，不进入后续筛选，也不再获取候选销售信息，不进入后续重复判断。候选 <code>spu</code> 与目标 <code>spu_code</code> 属同一编码体系，按字符串全等比较。</li>
+</ol>
+<p>说明：</p>
+<ul>
+<li><code>spu_relation_group</code> 返回时已包含目标SPU本身；未返回时，仅过滤目标SPU（即上述 <code>spu_code</code>）；</li>
+<li>同一SPU及已维护关联关系的SPU均不作为重复开品结果；</li>
+<li>被过滤的候选不计入 <code>candidate_count</code> 和 <code>non_duplicate_count</code>；</li>
+<li>仅输入标题或图片、无法获取目标SPU信息时，不执行本步骤。</li>
+</ul>
+<h2>步骤4：候选产品筛选与代表 SKU 选择</h2>
+<p>相似接口返回的 <code>data</code> 中，每条数据代表一个候选 SPU；该条数据下的 <code>spu_is_account_or_overdue</code> 是该候选 SPU 下的 SKU 列表。</p>
+<p>候选筛选按候选 SPU 维度执行。需要排除两类候选：一级品线为“服装”的产品，以及下列指定地毯品类。两类规则在此统一说明，但字段取得时间不同：地毯使用相似接口的 <code>category_name_path</code>，在本步骤过滤；服装使用候选销售信息中的 <code>product_line_name</code>，本步骤暂不判断，待步骤6取得详情后过滤。</p>
+<p>对每个候选 SPU：</p>
+<ol>
+<li>先使用 <code>data[].category_name_path</code> 过滤指定地毯品类。</li>
+</ol>
+<p>若完整路径等于以下任一项，过滤该候选 SPU，不再处理其下 SKU：</p>
+<ul>
+<li>家居、厨具、家装&gt;厨房和餐厅&gt;餐厨布艺&gt;厨房地毯&gt;</li>
+<li>家居、厨具、家装&gt;家居装饰&gt;地毯、地垫和保护剂&gt;地毯&gt;</li>
+<li>艺术品、工艺品和缝纫用品&gt;派对装饰品和用品&gt;过道地毯&gt;</li>
+<li>家居、厨具、家装&gt;家居装饰&gt;地毯、地垫和保护剂&gt;儿童房地毯&gt;</li>
+<li>家居、厨具、家装&gt;家居装饰&gt;地毯、地垫和保护剂&gt;长条地毯&gt;</li>
+<li>庭院、草坪和园艺&gt;户外饰品&gt;户外地毯&gt;</li>
+<li>家居、厨具、家装&gt;家居装饰&gt;地毯、地垫和保护剂&gt;无痕地毯贴和地垫&gt;</li>
+<li>家居、厨具、家装&gt;家居装饰&gt;地毯、地垫和保护剂&gt;地垫&gt;</li>
+</ul>
+<ol>
+<li>未被指定地毯品类过滤的候选 SPU，再处理其下 <code>spu_is_account_or_overdue</code> SKU 列表。</li>
+<li>仅保留 <code>product_lifecycle in [0, 1]</code> 的 SKU。</li>
+<li>若无符合条件的 SKU，过滤该候选 SPU。</li>
+<li>在保留 SKU 中优先选择 <code>packing_is_sale = 1</code> 的 SKU。</li>
+<li>如没有 <code>packing_is_sale = 1</code>，选择第一个保留 SKU。</li>
+<li>每个候选 SPU 只保留一个代表 SKU。</li>
+</ol>
+<p>说明：</p>
+<ul>
+<li>指定地毯品类按相似接口返回的 <code>data[].category_name_path</code> 原值判断。</li>
+<li>被指定地毯品类过滤的候选 SPU 不进入候选组，不参与后续重复判断，不输出详细结果。</li>
+<li>未命中指定地毯品类过滤规则时，才继续进行 SKU 状态过滤和代表 SKU 选择。</li>
+</ul>
+<p>候选组结果：</p>
+<ul>
+<li>候选 SPU：<code>data[].spu</code></li>
+<li>候选品类：<code>data[].category_name_path</code></li>
+<li>代表 SKU：选中的 <code>spu_is_account_or_overdue[].sku</code></li>
+</ul>
+<h2>步骤5：获取候选销售信息</h2>
+<p>对保留的每个候选组，使用代表 SKU 调用：</p>
+<pre><code>get_developer_sales_info(sku_code = 代表SKU)</code></pre>
+<p>获取候选代表 SKU 的销售信息，判断字段与步骤1目标产品字段一致，包括SKU、SPU、品类、品线、标题、主图、尺寸、重量、材质、变体属性、功能、采购价、供应商编码、是否可独立售卖等。</p>
+<p>本步骤只负责获取销售信息，不做任何过滤；品线与配件的过滤统一在步骤6执行。</p>
+<h2>步骤6：执行重复判断</h2>
+<p>对目标代表 SKU 与候选代表 SKU 的销售信息进行判断。</p>
+<p>判断顺序：</p>
+<ol>
+<li>先对候选代表 SKU 做配件过滤与品线过滤；</li>
+<li>再判断标题主体和外形主体是否一致；</li>
+<li>标题主体一致且外形主体一致时，再根据采购价/供应商、关键规格字段区分“相同产品”或“同款产品”。</li>
+</ol>
+<h4>6.1 配件过滤</h4>
+<p>若候选代表 SKU 的 <code>sku_attributes.specifications</code> 命中配件标识，则不进入重复产品判断。</p>
+<p>配件标识包括：</p>
+<ul>
+<li><code>配件</code></li>
+<li><code>Accessory</code></li>
+</ul>
+<p>支持带数字后缀，例如 <code>配件1</code>、<code>配件2</code>、<code>Accessory 1</code>、<code>Accessory 2</code>。 判断时忽略大小写和空格。</p>
+<p>若 <code>sku_attributes.specifications</code> 为空或未命中配件标识，则继续执行重复判断。</p>
+<p>被配件过滤的候选不进入最终重复判断，不计入 <code>candidate_count</code>，也不计入 <code>non_duplicate_count</code>。</p>
+<h4>6.2 品线过滤</h4>
+<p>读取候选代表 SKU 的 <code>product_line_name</code> 第一段（以 <code>&gt;</code> 分隔，去除首尾空格）：等于“服装”则过滤该候选 SPU，不进入重复判断。</p>
+<ul>
+<li>字段缺失时不凭品类猜测为服装。</li>
+<li>被品线过滤的候选不计入 <code>candidate_count</code>，也不计入 <code>non_duplicate_count</code>。</li>
+</ul>
+<h4>6.3 标题和外形判断口径</h4>
+<ul>
+<li>标题主体一致：核心产品对象、用途、结构/功能一致；SKU 标题中的颜色、尺寸、型号、适配范围、数量、套装规格等变体差异，不直接否定标题主体一致。</li>
+<li>外形主体一致：基于实际读取的目标图与候选图内容判断，产品主体结构、形态、部件组成、安装/连接方式一致；颜色、尺寸大小、局部配件数量差异，不直接否定外形主体一致。</li>
+<li>对每个候选，优先用当前模型可用的视觉能力读取目标图（目标代表 SKU 的 <code>main_image_url</code>，或用户直接提供的图片）与候选代表 SKU 的 <code>main_image_url</code> 对应图片；无法取得有效视觉结果时，调用 <code>multimodal_understanding</code> 分析两张图，再比较主体结构。仅返回 URL 或相似分数不算已分析图片。</li>
+<li><code>similar_image_search</code> 命中只表示候选被召回，不等于外形主体一致；不得仅凭接口命中或相似分数判定外形一致。</li>
+<li><code>main_image_url</code> 相同，可直接判定主图一致，不再调用视觉能力或 <code>multimodal_understanding</code>（同一地址指向同一张图片，主图内容必然一致）；<code>main_image_url</code> 不同，不能作为外形不同的依据，仍须实际读取并比较两张图的内容后才能判断。</li>
+<li>若任一主图缺失，或模型视觉及多模态工具均无法读取有效图片内容，则外形主体记为“无法确认”，并说明原因，不得声称已看图。</li>
+<li>仅输入图片时，无法获取目标标题，标题主体记为“无法比较”，判断结果最多为“疑似重复”，不判为“相同产品”或“同款产品”。</li>
+<li>输出判断依据（报告“判断依据”列与结构化 <code>reason</code>）时，先点明标题与外形各自的一致性结论，再写具体原因，不要只罗列现象。例：标题主体一致（核心产品均为儿童秋千，单座与双座为数量差异），外形主体一致（A型框架、橙蓝配色一致），但采购价不一致（274 vs 292），判定为同款产品。</li>
+</ul>
+<h4>6.4 采购价、供应商和关键规格判断口径</h4>
+<p>标题主体一致且外形主体一致时，再判断以下两组条件：</p>
+<p><strong>条件组A：采购价和供应商一致</strong></p>
+<ul>
+<li><code>supplier_code</code> 一致；</li>
+<li><code>purchase_price</code> 整数部分一致。</li>
+</ul>
+<p><code>purchase_price</code> 判断时忽略小数部分，只比较整数部分，例如：</p>
+<ul>
+<li><code>268</code> 与 <code>268.00</code> 视为一致；</li>
+<li><code>268.1</code> 与 <code>268.9</code> 视为一致；</li>
+<li><code>268.9</code> 与 <code>269.1</code> 视为不一致。</li>
+</ul>
+<p><strong>条件组B：关键规格字段基本一致</strong></p>
+<p>关键规格字段包括：</p>
+<ul>
+<li>尺寸：<code>length / width / height</code></li>
+<li>重量：<code>weight</code></li>
+<li>材质：<code>material</code></li>
+<li>功能：<code>sales_info.sell_points.功能</code></li>
+</ul>
+<p>尺寸、重量可按 ±5% 容差判断；材质、功能按字段内容是否基本一致判断。</p>
+<h4>6.5 重复判断规则</h4>
+<div class="tw"><table><thead><tr><th>条件</th><th>结果</th><th>说明</th></tr></thead><tbody><tr><td>标题主体一致 + 外形主体一致 + 供应商编码一致 + 采购价整数部分一致</td><td>相同产品</td><td>供应商和采购价一致，基本可认为是同一产品</td></tr><tr><td>标题主体一致 + 外形主体一致 + 尺寸/重量/材质/功能基本一致</td><td>相同产品</td><td>关键规格字段基本一致，基本可认为是同一产品</td></tr><tr><td>标题主体一致 + 外形主体一致，但供应商/采购价、尺寸/重量/材质/功能均未达到相同产品判断标准</td><td>同款产品</td><td>标题和外形一致，但未满足相同产品条件，按同款产品处理</td></tr><tr><td>标题主体一致 + 外形主体不一致</td><td>疑似重复</td><td>标题主体一致，但外形不一致，需人工复核</td></tr><tr><td>标题主体一致 + 外形主体无法确认</td><td>疑似重复</td><td>标题主体一致，但图片不足以确认外形，需人工复核</td></tr><tr><td>标题主体不一致 + 外形主体一致</td><td>疑似重复</td><td>外形主体一致，但标题主体不一致，需人工复核</td></tr><tr><td>标题主体不一致 + 外形主体不一致</td><td>非重复</td><td>标题和外形均不同</td></tr><tr><td>标题主体不一致 + 外形主体无法确认</td><td>非重复</td><td>标题主体不一致，且图片无法提供有效相似依据</td></tr><tr><td>标题主体无法比较 + 外形主体一致</td><td>疑似重复</td><td>仅输入图片时，标题无法参与判断，最多判为疑似重复，需人工复核</td></tr><tr><td>标题主体无法比较 + 外形主体不一致</td><td>非重复</td><td>仅输入图片，且外形主体不一致</td></tr><tr><td>标题主体无法比较 + 外形主体无法确认</td><td>非重复</td><td>仅输入图片，且外形无法确认，无有效相似依据</td></tr></tbody></table></div>
+<p>说明：</p>
+<ul>
+<li>“相同产品”和“同款产品”必须同时满足标题主体一致、外形主体一致。</li>
+<li>采购价/供应商、尺寸/重量/材质/功能只用于在标题主体一致、外形主体一致后，区分“相同产品”和“同款产品”。</li>
+<li>只满足标题主体一致，或只满足外形主体一致，均判为疑似重复。</li>
+<li>标题主体不一致，且外形主体不一致或无法确认时，判为非重复。</li>
+<li>输出判断结果时，应说明本次判断的关键依据；若判为同款产品，需说明未判为相同产品的主要差异。</li>
+<li>不得在 <code>summary</code>、<code>reason</code>、<code>difference</code> 中输出“条件组A”“条件组B”等内部规则编号，应直接写明具体判断依据。</li>
+<li>结构化输出中，判断依据写入 <code>reason</code>；同款产品的主要差异写入 <code>difference</code>。</li>
+<li>存在“相同产品”或“同款产品”即表示存在重复开品。</li>
+</ul>
+<h2>异常处理</h2>
+<p>单路异常不中断任务，按下表处理；处理完成后在 <code>error_message</code> 中按“记录”列填写。</p>
+<div class="tw"><table><thead><tr><th>异常</th><th>处理</th><th>error_message 记录</th></tr></thead><tbody><tr><td>编码查询接口报错（目标信息从一开始就取不到，无任何判断依据）</td><td>该目标直接终止，不执行召回与判断，不输出任何候选；status 记“查询失败”，其余目标继续执行</td><td><code>SKU信息查询失败</code></td></tr><tr><td>接口正常，但 SPU 与 SKU 两种方式各查询一次均无数据</td><td>不视为异常，status 记“无产品信息”，不执行重复判断</td><td>空字符串</td></tr><tr><td>标题召回接口报错</td><td>不中断，改用图片召回继续；若无有效候选，该目标记“查询失败”</td><td><code>标题召回失败</code></td></tr><tr><td>图片召回接口报错</td><td>不中断，改用标题召回继续；若无有效候选，该目标记“查询失败”</td><td><code>图片召回失败</code></td></tr><tr><td>标题与图片召回均报错</td><td>无法召回候选，该目标停止判断，status 记“查询失败”</td><td><code>标题与图片召回均失败</code></td></tr><tr><td>模型视觉未获得有效图片信息</td><td>不中断，降级调用 <code>multimodal_understanding</code> 继续判断，<code>image_analysis_source</code> 记“多模态”</td><td>空字符串（属正常降级路径）</td></tr><tr><td>模型视觉与 <code>multimodal_understanding</code> 均无法读取有效内容</td><td>不中断，该候选 <code>image_judgement</code> 记“外形主体无法确认”、<code>image_analysis_source</code> 记“未读图”，继续用标题、品类、销售属性判断；若因此判为非重复，建议处理记“人工复核”</td><td><code>图片不可读</code></td></tr></tbody></table></div>
+<p>记录规则：</p>
+<ul>
+<li>多个原因同时出现时用 <code>；</code> 连接，总长度不超过 60 字；</li>
+<li>除上表“记录”列给出的内容外，不得自行编写其他文案，不得粘贴接口报错原文；</li>
+<li>未出现上表任一异常时，<code>error_message</code> 为空字符串；</li>
+<li>候选级问题（召回来源、单张图不可读）由 <code>recall_source</code>、<code>image_summary</code>、<code>image_analysis_source</code> 记录，不在 <code>error_message</code> 中重复描述。</li>
+</ul>
+<h2>输出结果</h2>
+<p>报告必须严格按下列模板输出：列名与列顺序固定，不得自创列名、不得增减列；相同产品、同款产品、疑似重复必须是三张独立表，不得合并为一张；每个目标的「目标产品」与「结论」两段必须完整输出，不得省略、不得只写数量。</p>
+<h3>单目标</h3>
+<p>按以下模板输出：</p>
+<pre><code>## 产品重复开品检测报告
+
+### 目标产品
+- SKU编码：[target_sku]
+- SPU编码：[target_spu]
+- 品类：[category_name_path]
+- 产品标题：[sku_cn_title]
+- 产品图片：[main_image]
+- 尺寸：[length × width × height]
+- 重量：[weight]
+- 材质：[material]
+- 功能：[function]
+- 采购价：[purchase_price]
+- 供应商编码：[supplier_code]
+- 是否可独立售卖：[is_independent_saleable]
+
+### 检测结果
+
+#### 相同产品（X个）
+| 相似SPU | 相似SKU | 相似产品标题 | 相似主图 | 判断依据 | 建议处理 |
+|---|---|---|---|---|---|
+
+#### 同款产品（X个）
+| 相似SPU | 相似SKU | 相似产品标题 | 相似主图 | 判断依据 | 差异点 | 建议处理 |
+|---|---|---|---|---|---|---|
+
+#### 疑似重复（X个）
+| 相似SPU | 相似SKU | 相似产品标题 | 相似主图 | 疑似原因 | 需确认项 |
+|---|---|---|---|---|---|
+
+### 结论
+- 是否存在重复开品：[是/疑似/否]
+- 相同产品数量：[X]
+- 同款产品数量：[X]
+- 疑似重复数量：[X]
+- 建议：[删除重复/合并保留/人工确认/继续开发]</code></pre>
+<p>异常形态：status 为“无产品信息”或“查询失败”时，不执行重复判断，不输出上述检测表格与结论，改为输出处理状态及异常原因。</p>
+<p>涉及图片判断时，在“判断依据”或“疑似原因”中写明两张图实际可见的主体特征；图片不可读时写“外形无法确认”及原因。</p>
+<p>“相似主图”列填候选代表 SKU 的 <code>main_image_url</code>，用于展示实际参与外形比较的那张图，不得填相似接口返回的 <code>main_image</code>。</p>
+<p>该列必须用 markdown 图片语法输出：<code><a href="main_image_url" target="_blank">[图] 候选图</a></code>。不得写裸 URL，不得写成 <code><a href="url" target="_blank">候选图</a></code> 文字链接。主图缺失或 URL 为空时，该格写“无”。</p>
+<h3>多目标</h3>
+<p>先输出汇总表，再按展开规则输出明细。</p>
+<pre><code>## 产品重复开品检测报告（共 N 个目标）
+
+### 汇总
+
+| # | 目标SPU | 目标SKU | 状态 | 相同 | 同款 | 疑似 | 结论 |
+|---|---|---|---|---|---|---|---|
+| 1 | PHK_337D | PHK_337DHYKY | 已完成 | 0 | 2 | 0 | 是 |
+| 2 | PHK_3AP4 | PHK_3AP48K3C | 已完成 | 0 | 0 | 0 | 否 |
+| 3 | XXX | - | 无产品信息 | - | - | - | - |
+
+### 明细
+
+#### 目标 1：PHK_337DHYKY
+
+（按单目标模板的“目标产品 / 检测结果 / 结论”三部分完整输出）
+
+#### 目标 3：XXX
+
+（status 为“无产品信息”或“查询失败”时，仅输出处理状态与异常原因）</code></pre>
+<p>汇总表固定 8 列（<code># / 目标SPU / 目标SKU / 状态 / 相同 / 同款 / 疑似 / 结论</code>），不得增减列、不得改列名；「状态」列必填，取值为“已完成 / 无产品信息 / 查询失败”。</p>
+<p>展开规则：</p>
+<ul>
+<li>有重复（is_duplicate 为“是”或“疑似”）的目标，在“明细”中展开完整报告；</li>
+<li>status 为“无产品信息”或“查询失败”的目标，在“明细”中展开异常说明；</li>
+<li>其余目标（无重复且状态正常）只在汇总表出现，不展开，不输出候选明细；</li>
+<li>汇总表按输入顺序编号，明细按汇总表编号顺序排列；</li>
+<li>明细中每个目标必须完整输出单目标模板的三部分：<code>### 目标产品</code>（12 项逐项填写）、<code>### 检测结果</code>（相同 / 同款 / 疑似三张独立表）、<code>### 结论</code>（5 项逐项填写）；不得只写标题与采购价，不得省略「结论」段；</li>
+<li>单个目标按“单目标”模板输出，不加汇总表。</li>
+</ul>
+<h3>建议处理口径</h3>
+<ul>
+<li>相同产品：建议删除重复产品。</li>
+<li>同款产品：建议人工确认是否合并保留。</li>
+<li>疑似重复：建议人工复核后再判断。</li>
+</ul>
+<p>说明：同款产品不直接等同于相同产品，不直接建议删除。</p>
+<h2>注意事项</h2>
+<ol>
+<li>标题搜索命中不等于标题一致。</li>
+<li>图片搜索命中不等于外形一致。</li>
+<li>相似接口分数不作为最终判断依据，不输出。</li>
+<li>相似接口返回的标题、图片仅用于召回，不作为最终判断字段。</li>
+<li>最终判断必须使用 <code>get_developer_sales_info</code> 返回的销售信息；涉及外形一致时，需实际读取目标产品与候选产品主图，图片相似接口的命中只表示候选被召回。</li>
+<li>尺寸、重量可按 ±5% 容差判断。</li>
+<li>本技能不负责批量跑数、断点续跑、Excel 落表。</li>
+<li>编码查询必须先按 SPU、再按 SKU 各查询一次，两次均无返回才可判定“无产品信息”。</li>
+<li>排除自身一律按步骤1 返回的 <code>spu_code</code> 执行：输入 SPU 时排除该 SPU，输入 SKU 时排除该 SKU 所属的 SPU；不得用 SKU 编码、标题或主图去判断自身。</li>
+</ol>
+<h2>输出语言</h2>
+<p>使用与用户输入相同的语言输出。</p>
+<h2>结构化输出要求</h2>
+<p>当调用方要求返回 JSON / JsonSchema / 结构化结果时，本技能不得输出自然语言检测报告，必须将检测结果整理为结构化 JSON。</p>
+<p>结构化输出优先级高于默认报告模板。</p>
+<p>顶层结构统一为 JSON 数组：无论单个还是多个目标，均返回数组，数组元素为下述字段构成的对象，顺序与输入顺序一致。单个目标返回长度为 1 的数组。</p>
+<p>结构化输出字段包括：</p>
+<ul>
+<li>target_sku：目标SKU</li>
+<li>target_spu：目标SPU</li>
+<li>target_title：目标SKU标题</li>
+<li>target_category：目标品类路径</li>
+<li>target_image：目标主图</li>
+<li>status：处理状态，取值为“已完成 / 无产品信息 / 查询失败”</li>
+<ul>
+<li>“无产品信息”仅指输入了 SKU/SPU 编码、且按 SPU 与 SKU 两种方式各查询一次均无返回数据的情形；只查询一种方式即判定无产品信息属于错误。仅输入标题或图片时，status 记为“已完成”。</li>
+</ul>
+<li>is_duplicate：是否存在重复开品，取值为“是 / 疑似 / 否 / 空字符串”</li>
+<li>same_product_count：相同产品数量</li>
+<li>same_style_count：同款产品数量</li>
+<li>suspected_count：疑似重复数量</li>
+<li>non_duplicate_count：非重复候选数量</li>
+<li>non_duplicate_spus：非重复候选的 SPU 编码数组，按 SPU 去重；只记编码，不记 SKU、标题、主图</li>
+<li>candidate_count：参与最终判断的候选数量</li>
+<li>summary：整体判断摘要</li>
+<li>duplicate_items_json：重复明细 JSON 数组字符串</li>
+<li>error_message：异常原因，取值见「异常处理」章节；无异常时为空字符串</li>
+</ul>
+<p>duplicate_items_json 只包含以下三类明细：</p>
+<ul>
+<li>相同产品</li>
+<li>同款产品</li>
+<li>疑似重复</li>
+</ul>
+<p>不得将“非重复”写入 duplicate_items_json。</p>
+<p>duplicate_items_json 中每个对象包含：</p>
+<ul>
+<li>duplicate_type：重复类型</li>
+<li>similar_spu：相似SPU</li>
+<li>similar_sku：相似SKU</li>
+<li>similar_title：相似产品标题</li>
+<li>similar_category：相似品类</li>
+<li>similar_image：相似主图</li>
+<li>recall_source：召回来源，标题 / 图片 / 标题+图片</li>
+<li>title_judgement：标题主体一致 / 标题主体不一致 / 标题主体无法比较</li>
+<li>image_judgement：外形主体一致 / 外形主体不一致 / 外形主体无法确认</li>
+<li>image_summary：实际读取目标图与候选图后的主体结构比较依据；无法读取时注明原因，不得臆造图片内容</li>
+<li>image_analysis_source：外形判断实际使用的读图方式，取值为“模型视觉 / 多模态 / 主图地址相同 / 未读图”</li>
+<ul>
+<li>模型视觉：用当前模型的视觉能力直接读取目标图与候选图后判断</li>
+<li>多模态：模型视觉未取得有效结果，改调 <code>multimodal_understanding</code> 后判断</li>
+<li>主图地址相同：目标与候选 <code>main_image_url</code> 完全相同，按步骤6.3 直接判定主图一致，未读图</li>
+<li>未读图：模型视觉与 <code>multimodal_understanding</code> 均无法读取有效内容，此时 <code>image_judgement</code> 必须为“外形主体无法确认”</li>
+</ul>
+<li>reason：判断依据</li>
+<li>difference：差异点</li>
+<li>suggestion：建议处理</li>
+</ul>
+<p>若无相同产品、同款产品、疑似重复，duplicate_items_json 返回 &quot;[]&quot;。 若无非重复候选，non_duplicate_spus 返回 &quot;[]&quot;。 duplicate_items_json 中 <code>difference</code> 字段，同款产品需填写主要差异，相同产品和疑似重复为空字符串。</p>
+<p>计数字段要求：</p>
+<ul>
+<li>same_product_count = duplicate_items_json 中 duplicate_type 为“相同产品”的数量</li>
+<li>same_style_count = duplicate_items_json 中 duplicate_type 为“同款产品”的数量</li>
+<li>suspected_count = duplicate_items_json 中 duplicate_type 为“疑似重复”的数量</li>
+<li>candidate_count = 相同产品数 + 同款产品数 + 疑似重复数 + 非重复数</li>
+<li>candidate_count 只统计进入最终重复判断的候选，不包含被指定地毯品类、服装品线、生命周期、目标SPU/关联SPU或候选配件规则过滤的候选。</li>
+<li>non_duplicate_count = non_duplicate_spus 的数组长度（候选按 SPU 去重，一个候选对应一个 SPU）</li>
+<li><code>image_judgement</code> 为“外形主体一致”或“外形主体不一致”时，<code>image_analysis_source</code> 不得为“未读图”；出现该组合说明未实际读图即下了外形结论，该候选不得计入三类明细，须重新读取图片后再判断</li>
+</ul>
+<p>error_message 规则：</p>
+<p>只记录任务级异常，取值与写法按「异常处理」章节执行，不得自行编写其他文案。候选级的召回来源见 <code>recall_source</code>，图片读取情况见 <code>image_summary</code> 与 <code>image_analysis_source</code>，均不在本字段重复。未出现异常时返回空字符串。</p>
+<p>is_duplicate 规则：</p>
+<ul>
+<li>same_product_count &gt; 0 或 same_style_count &gt; 0：返回“是”</li>
+<li>same_product_count = 0 且 same_style_count = 0 且 suspected_count &gt; 0：返回“疑似”</li>
+<li>三类数量均为 0：返回“否”</li>
+<li>status 为“无产品信息”或“查询失败”：返回空字符串</li>
+</ul>
+<p>status 为“无产品信息”或“查询失败”时的字段取值：</p>
+<p>目标信息未能取得时，召回与判断均不执行，不存在任何候选，不得编造候选或计数。除 <code>target_spu</code>、<code>target_sku</code>、<code>status</code>、<code>error_message</code> 外，其余字段一律按下表返回：</p>
+<div class="tw"><table><thead><tr><th>字段</th><th>取值</th></tr></thead><tbody><tr><td><code>target_title</code> / <code>target_category</code> / <code>target_image</code></td><td>能取到则填，取不到返回空字符串</td></tr><tr><td><code>is_duplicate</code></td><td>空字符串</td></tr><tr><td><code>same_product_count</code> / <code>same_style_count</code> / <code>suspected_count</code></td><td>0</td></tr><tr><td><code>non_duplicate_count</code> / <code>candidate_count</code></td><td>0</td></tr><tr><td><code>non_duplicate_spus</code></td><td><code>[]</code></td></tr><tr><td><code>summary</code></td><td>空字符串</td></tr><tr><td><code>duplicate_items_json</code></td><td><code>&quot;[]&quot;</code></td></tr></tbody></table></div>
+<p>其中“查询失败”（含 <code>SKU信息查询失败</code>）表示目标信息从一开始就没取到，任务在该目标处直接终止，不执行步骤2 及之后的任何步骤；“无产品信息”表示接口正常但确实没有该产品，<code>error_message</code> 返回空字符串。</p>
+</div></div></body></html>
