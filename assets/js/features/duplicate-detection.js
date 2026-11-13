@@ -380,6 +380,8 @@ Object.entries(duplicateDetectionData).forEach(([id,d],i)=>{
       target_title:bulkTarget.title,target_category:'家居、厨具、家装 > 制冷设备 > 移动空调',target_image:null,
       same_product_count:3,same_style_count:8,suspected_count:14,non_duplicate_count:20,candidate_count:45,
       duplicate_items_json:JSON.stringify(rows),
+      // 该记录在本段被整体重建，需自带时间戳，否则报告标题会取不到检测时间。
+      detected_at:'2026-11-04 14:09',completed_at:'2026-11-04 14:09',
       summary:'本次共 45 条比对记录：3 个相同产品、8 个同款产品、14 个疑似重复，另有 20 个非重复。'
     };
   }
@@ -470,7 +472,7 @@ function timeForModal(d,state){
  const value=state==='running'
   ? (d.started_at||d.submitted_at||d.created_at||d.detected_at)
   : (d.completed_at||d.failed_at||d.detected_at||d.updated_at||d.started_at||d.created_at);
- return dateText(value)||'时间待记录';
+ return dateText(value);
 }
 /* 检测时间挂在弹窗标题「重复品检测报告」后面，不占正文空间。 */
 function dupHeaderExtra(d,state){
@@ -638,7 +640,7 @@ function detectionModalFooter(id,mode){
  }
 
 // 右上角 × 已可关闭，底部不再重复放「关闭」按钮。
- // 判定规则改为报告弹窗内的 tab（见 switchDupTab），不再从 footer 打开第二层浮层。
+ // 判定规则挂在「检测明细」标题右侧下拉展开（toggleDupRules），不占 tab、不另开浮层。
  return `<div class="modal-actions">${buttons.join('')}</div>`;
 }
   renderDetectionTarget=function(item,d){
@@ -664,34 +666,28 @@ function detectionModalFooter(id,mode){
     return `<div class="dup-reason-hover" tabindex="0" data-full-reason="${escapeHtml(full)}">${inner}</div>`;
   }
   /* 判定规则：先给判定结果，再按结果分块列出具体判断条件（口径与 Skill 一致）。 */
-  /* 判定规则：几句话讲清「判定顺序 + 四类结果」，不再铺 11 条条件组合表。 */
+  /* 判定规则：只给判定口径，不写处理建议。 */
   function rulesReference(){
+    // 只用普通文字，不做颜色标签。
     const items=[
-      ['相同产品','same','标题主体和外形主体都一致，并且供应商编码与采购价整数部分一致，或尺寸、重量、材质、功能基本一致。','建议合并，保留已有产品。'],
-      ['同款产品','style','标题主体和外形主体都一致，但供应商/采购价、关键规格都没对上。','不直接删除，人工确认后再决定是否合并。'],
-      ['疑似重复','suspected','标题主体和外形主体只有一项能对上，另一项不一致或图片无法确认。','系统不下结论，需要人工复核。'],
-      ['非重复','none','标题主体和外形主体都对不上。','正常开品，无需处理。']
+      ['相同产品','标题/外形主体均一致，并且供应商与采购价整数部分一致，或尺寸、重量、材质、功能基本一致。'],
+      ['同款产品','标题/外形主体均一致，但采购价与关键规格均未达到相同产品标准。'],
+      ['疑似重复','标题/外形主体只有一项一致，另一项不一致或无法确认。']
     ];
-    const body=items.map(([name,kind,desc,advice])=>
-      `<div class="dup-rule-line"><span class="dup-rule-tag ${kind}">${name}</span><span class="dup-rule-line-text">${desc}<b>${advice}</b></span></div>`
+    const body=items.map(([name,text])=>
+      `<div class="dup-rule-line"><span class="dup-rule-label">${name}：</span><span class="dup-rule-line-text">${text}</span></div>`
     ).join('');
-    return `<div class="dup-rule-note">以下为系统检测判定口径，具体结果以本次检测报告为准。</div>
-      <div class="dup-rule-lead">系统先比对标题主体和外形主体，两项都一致才会继续比对采购价与关键规格。</div>
-      <div class="dup-rule-lines">${body}</div>`;
+    return `<div class="dup-rule-lines">${body}</div>`;
   }
-  /* 报告弹窗内切换「检测结果 / 判定规则」，规则不再单独开一层浮层，避免弹窗套弹窗。 */
-  window.switchDupTab=function(name){
-    const result=document.getElementById('dupTabResult');
-    const rule=document.getElementById('dupTabRule');
-    if(!result||!rule)return;
-    const isRule=name==='rule';
-    result.style.display=isRule?'none':'';
-    rule.style.display=isRule?'':'none';
-    document.querySelectorAll('.dup-modal-tab').forEach(function(btn){
-      btn.classList.toggle('active',(btn.getAttribute('data-dup-tab')==='rule')===isRule);
-    });
-    const body=document.getElementById('modalBody');
-    if(body)body.scrollTop=0;
+  /* 判定规则不再占一个 tab，改为「检测明细」标题右侧的下拉展开。 */
+  window.toggleDupRules=function(){
+    const panel=document.getElementById('dupRulesInline');
+    const btn=document.getElementById('dupRulesToggle');
+    if(!panel)return;
+    const show=panel.style.display==='none';
+    dupRulesOpen=show;
+    panel.style.display=show?'':'none';
+    if(btn)btn.textContent=show?'判定规则 ▴':'判定规则 ▾';
   };
 
   /* ---- 主图放大预览：只展示图片本身，不显示标题等文字信息 ---- */
@@ -748,6 +744,8 @@ function detectionModalFooter(id,mode){
     else if(e.key==='ArrowRight')dupImageStep(1);
   });
   let dupFilter='all', dupPage=1;
+  // 判定规则下拉的展开状态：翻页、切筛选重渲染后要保持，重开弹窗才重置。
+  let dupRulesOpen=false;
   const DUP_PAGE_SIZE=8;
   let dupViewerRows=[];
   setDupFilter=function(kind){dupFilter=kind;dupPage=1;renderDuplicateReportBody();};
@@ -789,7 +787,8 @@ function detectionModalFooter(id,mode){
     ].filter(([k,label,n])=>k==='all'||n>0)
      .map(([k,label,n])=>`<button class="dup-filter-chip ${dupFilter===k?'active':''}" onclick="setDupFilter('${k}')">${label} <b>${n}</b></button>`).join('');
     const pager=filtered.length>DUP_PAGE_SIZE?`<div class="dup-pager"><span>共 ${filtered.length} 条 · 第 ${dupPage} / ${totalPages} 页</span><div class="dup-pager-btns"><button class="btn-small" onclick="dupChangePage(-1)" ${dupPage<=1?'disabled':''}>上一页</button><button class="btn-small" onclick="dupChangePage(1)" ${dupPage>=totalPages?'disabled':''}>下一页</button></div></div>`:'';
-    return `<div class="dup-table-section-label">检测明细</div>
+    return `<div class="dup-table-section-label dup-section-head"><span>检测明细</span><button class="dup-rule-toggle" id="dupRulesToggle" onclick="toggleDupRules()">判定规则 ${dupRulesOpen?'▴':'▾'}</button></div>
+      <div class="dup-rule-inline" id="dupRulesInline"${dupRulesOpen?'':' style="display:none"'}>${rulesReference()}</div>
       <div class="dup-filter-bar">${chips}</div>
       <div class="dup-table-wrap dup-all-list"><table class="dup-candidates-table">
       <colgroup><col style="width:9%"><col style="width:11%"><col style="width:13%"><col style="width:8%"><col style="width:20%"><col style="width:39%"></colgroup>
@@ -810,13 +809,8 @@ renderDuplicateReportBody=function(){
     setModalHeaderExtra(dupHeaderExtra(d,state));
     // 检测报告内容宽（判断依据列要放 4 行文字），单独加宽这个弹窗。
     document.getElementById('modal').classList.add('modal-dup');
-    const tabs=`<div class="dup-modal-tabs">
-      <button class="dup-modal-tab active" data-dup-tab="result" onclick="switchDupTab('result')">检测结果</button>
-      <button class="dup-modal-tab" data-dup-tab="rule" onclick="switchDupTab('rule')">判定规则</button>
-    </div>`;
-    document.getElementById('modalBody').innerHTML=tabs
-      +`<div id="dupTabResult">${head+renderDetectionTarget(item,d)+content}</div>`
-      +`<div id="dupTabRule" style="display:none">${rulesReference()}</div>`;
+    // 不再单独开「检测结果 / 判定规则」tab，规则挂到「检测明细」标题右侧下拉。
+    document.getElementById('modalBody').innerHTML=head+renderDetectionTarget(item,d)+content;
 };
 openDuplicateDetection=function(id){
   if(detectionState(id)==='not-applicable')return;
@@ -839,7 +833,7 @@ openDuplicateDetection=function(id){
       const body=`<div class="dup-report-head"><span class="badge badge-process-failed">检测失败</span></div>${renderDetectionTarget(item,d)}<div class="dup-exception">本次检测未能正常完成，未生成有效检测结论。可以稍后重新检测。</div>`;
       showModal('重复品检测 · 检测失败',body,detectionModalFooter(id,'failed'),false,dupHeaderExtra(d,state));return;
     }
-    duplicateModalSpu=id;duplicateModalTab='';dupFilter='all';dupPage=1;
+    duplicateModalSpu=id;duplicateModalTab='';dupFilter='all';dupPage=1;dupRulesOpen=false;
     // 标题右侧的检测时间由 renderDuplicateReportBody 统一写（重测完成后要跟着刷新）。
     showModal('重复品检测报告','<div class="empty">正在读取结果…</div>',detectionModalFooter(id,'completed'),true);
     renderDuplicateReportBody();
@@ -855,7 +849,8 @@ function quickDetect(id){
  }
  manualReturnTemplate[id]=previous?.status==='已完成'?JSON.parse(JSON.stringify(previous)):makeDemoDuplicateRecord(id,1,1,1,1);
  const taskId='UI-DEMO-'+String(duplicateDemoSerial++).padStart(4,'0');
- duplicateDetectionData[id]={taskState:'running',taskId,status:'',is_duplicate:'',target_spu:id,target_sku:detailSkuCode(item),target_title:item.title,summary:'由列表快捷发起的新检测任务，等待模拟回调。',trigger_type:previous?'MANUAL_RECHECK':'MANUAL_FIRST'};
+ const startedAt=nowText();
+ duplicateDetectionData[id]={taskState:'running',taskId,status:'',is_duplicate:'',target_spu:id,target_sku:detailSkuCode(item),target_title:item.title,summary:'由列表快捷发起的新检测任务，等待模拟回调。',trigger_type:previous?'MANUAL_RECHECK':'MANUAL_FIRST',started_at:startedAt,detected_at:startedAt,task_status:'PROCESSING'};
  renderTable();
  toast('已发起检测（模拟）：'+taskId);
  setTimeout(function(){
@@ -895,13 +890,10 @@ function confirmManualDetection(id){
  }
  manualReturnTemplate[id]=previous&&previous.status==='已完成'?JSON.parse(JSON.stringify(previous)):makeDemoDuplicateRecord(id,0,0,0,2);
  const taskId='UI-DEMO-'+String(duplicateDemoSerial++).padStart(4,'0');
- duplicateDetectionData[id]={taskState:'running',taskId,status:'',is_duplicate:'',target_spu:id,target_sku:detailSkuCode(item),target_title:item.title,summary:'由用户手动发起的新检测任务，等待模拟回调。',trigger_type:previous?'MANUAL_RECHECK':'MANUAL_FIRST'};
+ const startedAt=nowText();
+ // 发起时间随任务一起写入，避免弹窗先打开再补时间导致标题出现空档。
+ duplicateDetectionData[id]={taskState:'running',taskId,status:'',is_duplicate:'',target_spu:id,target_sku:detailSkuCode(item),target_title:item.title,summary:'由用户手动发起的新检测任务，等待模拟回调。',trigger_type:previous?'MANUAL_RECHECK':'MANUAL_FIRST',started_at:startedAt,detected_at:startedAt,task_status:'PROCESSING'};
  closeModal();renderTable();openDuplicateDetection(id);toast('模拟任务已创建：'+taskId);
- const d=duplicateDetectionData[id];
- if(d&&d.taskState==='running'){
-  d.started_at=nowText();d.detected_at=d.started_at;d.task_status='PROCESSING';d.result_status='';
-  renderTable();openDuplicateDetection(id);
- }
 }
 function simulateWebhook(id,kind){
  const d=duplicateDetectionData[id];if(!d||detectionState(id)!=='running'||!String(d.taskId||'').startsWith('UI-DEMO-'))return;
@@ -912,18 +904,18 @@ function simulateWebhook(id,kind){
   const template=manualReturnTemplate[id]||makeDemoDuplicateRecord(id,0,0,0,2);
   duplicateDetectionData[id]={...JSON.parse(JSON.stringify(template)),taskState:'completed',taskId:savedId,status:'已完成',target_spu:id,target_sku:detailSkuCode(item),target_title:item.title,trigger_type:'MANUAL',summary:template.summary||'（模拟）检测完成。'};
  }
+ // 先把回调时间落到记录上，再打开弹窗；否则标题会先出现一帧没有时间的空档。
+ const time=nowText();
+ const next=duplicateDetectionData[id];
+ next.detected_at=time;
+ if(next.taskState==='completed'&&next.status==='已完成'){
+  next.completed_at=time;next.task_status='SUCCESS';next.result_status=inferResultStatus(next,'SUCCESS');
+ }else if(next.taskState==='failed'||next.status==='查询失败'||next.status==='无产品信息'){
+  next.failed_at=time;next.task_status='FAILED';next.result_status='';
+ }
  duplicateTaskHistory[id]??=[];
- duplicateTaskHistory[id].unshift(JSON.parse(JSON.stringify(duplicateDetectionData[id])));
+ duplicateTaskHistory[id].unshift(JSON.parse(JSON.stringify(next)));
  closeModal();renderTable();openDuplicateDetection(id);toast('模拟 Webhook 已返回，任务已更新');
-  const d2=duplicateDetectionData[id];if(!d2)return;
-  const time=nowText();
-  d2.detected_at=time;
-  if(d2.taskState==='completed'&&d2.status==='已完成'){
-    d2.completed_at=time;d2.task_status='SUCCESS';d2.result_status=inferResultStatus(d2,'SUCCESS');
-  }else if(d2.taskState==='failed'||d2.status==='查询失败'||d2.status==='无产品信息'){
-    d2.failed_at=time;d2.task_status='FAILED';d2.result_status='';
-  }
-  renderTable();openDuplicateDetection(id);
 }
 function openDuplicateCandidate(spu){
  const x=getSpu(spu);if(x){closeModal();navigateToProduct(spu)}
